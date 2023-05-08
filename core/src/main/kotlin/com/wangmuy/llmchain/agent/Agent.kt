@@ -21,13 +21,13 @@ abstract class BaseAgent() {
         return null
     }
 
-    abstract fun plan(intermediateSteps: List<com.wangmuy.llmchain.agent.IntermediateStep>, args: Map<String, Any>?): BaseAgentAction
+    abstract fun plan(intermediateSteps: List<IntermediateStep>, args: Map<String, Any>?): BaseAgentAction
 
     abstract fun inputKeys(): List<String>?
 
     open fun returnStoppedResponse(
         earlyStoppingMethod: String,
-        intermediateSteps: List<com.wangmuy.llmchain.agent.IntermediateStep>,
+        intermediateSteps: List<IntermediateStep>,
         args: Map<String, Any>?): AgentFinish {
         if (earlyStoppingMethod == "force") {
             return AgentFinish(mapOf("output" to "Agent stopped due to iteration limit or time limit."), "")
@@ -41,16 +41,16 @@ abstract class BaseAgent() {
     }
 }
 
-abstract class BaseSingleActionAgent(): com.wangmuy.llmchain.agent.BaseAgent() {
+abstract class BaseSingleActionAgent(): BaseAgent() {
 }
 
-abstract class BaseMultiActionAgent(): com.wangmuy.llmchain.agent.BaseAgent() {
+abstract class BaseMultiActionAgent(): BaseAgent() {
 }
 
 abstract class Agent @JvmOverloads constructor(
     val llmChain: LLMChain,
     private val allowedTools: List<String>? = null
-): com.wangmuy.llmchain.agent.BaseSingleActionAgent() {
+): BaseSingleActionAgent() {
     companion object {
         const val AGENT_SCRATCHPAD = "agent_scratchpad"
     }
@@ -72,7 +72,7 @@ abstract class Agent @JvmOverloads constructor(
         )
     }
 
-    private fun constructScratchpad(intermediateSteps: List<com.wangmuy.llmchain.agent.IntermediateStep>): String {
+    private fun constructScratchpad(intermediateSteps: List<IntermediateStep>): String {
         val thoughtsSb = StringBuilder()
         for (step in intermediateSteps) {
             thoughtsSb.append(step.action.log)
@@ -86,7 +86,7 @@ abstract class Agent @JvmOverloads constructor(
         var parsedOutput = extractToolAndInput(fullOutput)
         while (parsedOutput == null) {
             fullOutput = fixText(fullOutput)
-            val agentScratchpad = fullInputs[com.wangmuy.llmchain.agent.Agent.Companion.AGENT_SCRATCHPAD] as MutableList<BaseMessage>
+            val agentScratchpad = fullInputs[AGENT_SCRATCHPAD] as MutableList<BaseMessage>
             agentScratchpad.add(BaseMessage(fullOutput))
             val output = llmChain.predict(fullInputs)
             fullOutput += output
@@ -95,7 +95,7 @@ abstract class Agent @JvmOverloads constructor(
         return AgentAction(parsedOutput.first, parsedOutput.second, fullOutput)
     }
 
-    override fun plan(intermediateSteps: List<com.wangmuy.llmchain.agent.IntermediateStep>, args: Map<String, Any>?)
+    override fun plan(intermediateSteps: List<IntermediateStep>, args: Map<String, Any>?)
     : BaseAgentAction {
         val fullInputs = getFullInputs(intermediateSteps, args)
         val action = getNextAction(fullInputs)
@@ -105,10 +105,10 @@ abstract class Agent @JvmOverloads constructor(
         return action
     }
 
-    private fun getFullInputs(intermediateSteps: List<com.wangmuy.llmchain.agent.IntermediateStep>, args: Map<String, Any>?)
+    private fun getFullInputs(intermediateSteps: List<IntermediateStep>, args: Map<String, Any>?)
             : Map<String, Any> {
         val thoughts = constructScratchpad(intermediateSteps)
-        val newInputs = mapOf<String, Any>(com.wangmuy.llmchain.agent.Agent.Companion.AGENT_SCRATCHPAD to thoughts, "stop" to getStop())
+        val newInputs = mapOf(AGENT_SCRATCHPAD to thoughts, "stop" to getStop())
         return args?.toMutableMap()?.also { it.putAll(newInputs) } ?: newInputs
     }
 
@@ -117,27 +117,27 @@ abstract class Agent @JvmOverloads constructor(
     }
 
     override fun inputKeys(): List<String>? {
-        return llmChain.inputKeys()?.filter { it != com.wangmuy.llmchain.agent.Agent.Companion.AGENT_SCRATCHPAD }
+        return llmChain.inputKeys()?.filter { it != AGENT_SCRATCHPAD }
     }
 
     abstract fun observationPrefix(): String
     abstract fun llmPrefix(): String
 
     // create_prompt
-    abstract class PromptBuilder<T: com.wangmuy.llmchain.agent.Agent.PromptBuilder<T, R>, R: BasePromptTemplate> {
+    abstract class PromptBuilder<T: PromptBuilder<T, R>, R: BasePromptTemplate> {
         abstract fun self(): T
         abstract fun build(): R
     }
 
     // from_llm_and_tools
-    abstract class Builder<T: com.wangmuy.llmchain.agent.Agent.Builder<T, R>, R> {
+    abstract class Builder<T: Builder<T, R>, R> {
         abstract fun self(): T
         abstract fun build(): R
     }
 
     override fun returnStoppedResponse(
         earlyStoppingMethod: String,
-        intermediateSteps: List<com.wangmuy.llmchain.agent.IntermediateStep>,
+        intermediateSteps: List<IntermediateStep>,
         args: Map<String, Any>?
     ): AgentFinish {
         when (earlyStoppingMethod) {
@@ -151,7 +151,7 @@ abstract class Agent @JvmOverloads constructor(
                     thoughtsSb.append("\n${observationPrefix()}${step.observation}${llmPrefix()}")
                 }
                 thoughtsSb.append("\n\nI now need to return a final answer based on the previous steps:")
-                val newInputs = mutableMapOf(com.wangmuy.llmchain.agent.Agent.Companion.AGENT_SCRATCHPAD to thoughtsSb.toString(), "stop" to getStop())
+                val newInputs = mutableMapOf(AGENT_SCRATCHPAD to thoughtsSb.toString(), "stop" to getStop())
                 val fullInputs = newInputs.also {
                     if (args != null) {
                         it.putAll(args)

@@ -9,7 +9,7 @@ import com.wangmuy.llmchain.tool.BaseTool
 import java.util.*
 
 class AgentExecutor @JvmOverloads constructor(
-    val agent: com.wangmuy.llmchain.agent.BaseAgent,
+    val agent: BaseAgent,
     val tools: List<BaseTool>,
     callbackManager: BaseCallbackManager?,
     var returnIntermediateSteps: Boolean = false,
@@ -40,7 +40,7 @@ class AgentExecutor @JvmOverloads constructor(
         return maxExecutionTime == null || timeElapsed < maxExecutionTime!!
     }
 
-    private fun onReturn(output: AgentFinish, intermediateSteps: List<com.wangmuy.llmchain.agent.IntermediateStep>)
+    private fun onReturn(output: AgentFinish, intermediateSteps: List<IntermediateStep>)
     : Map<String, Any> {
         callbackManager?.onAgentFinish(output, verbose)
         val finalOutput = output.returnValues
@@ -53,13 +53,13 @@ class AgentExecutor @JvmOverloads constructor(
     private fun takeNextStep(
         nameToToolMap: Map<String, BaseTool>,
         inputs: Map<String, Any>?,
-        intermediateSteps: List<com.wangmuy.llmchain.agent.IntermediateStep>): List<BaseAgentAction> {
+        intermediateSteps: List<IntermediateStep>): List<BaseAgentAction> {
         val output = agent.plan(intermediateSteps, inputs)
         if (output is AgentFinish) {
             return Collections.singletonList(output)
         }
         val actions = listOf(output as AgentAction)
-        val result = mutableListOf<com.wangmuy.llmchain.agent.IntermediateStep>()
+        val result = mutableListOf<IntermediateStep>()
         for (agentAction in actions) {
             callbackManager?.onAgentAction(agentAction, verbose)
             val observation = if (nameToToolMap.containsKey(agentAction.tool)) {
@@ -73,14 +73,14 @@ class AgentExecutor @JvmOverloads constructor(
                 val toolRunArgs = agent.toolRunLoggingArgs()
                 InvalidTool().run(agentAction.tool, this.verbose, toolRunArgs)
             }
-            result.add(com.wangmuy.llmchain.agent.IntermediateStep(agentAction, observation))
+            result.add(IntermediateStep(agentAction, observation))
         }
         return result
     }
 
     override fun onInvoke(inputs: Map<String, Any>?): Map<String, Any> {
         val nameToToolMap = tools.associateBy { it.name }
-        val intermediateSteps = mutableListOf<com.wangmuy.llmchain.agent.IntermediateStep>()
+        val intermediateSteps = mutableListOf<IntermediateStep>()
         var iterations = 0
         var timeElapsed = 0L
         val startTime = System.currentTimeMillis()
@@ -90,7 +90,7 @@ class AgentExecutor @JvmOverloads constructor(
                 return onReturn(nextStepOutput[0] as AgentFinish, intermediateSteps)
             }
 
-            intermediateSteps.addAll(nextStepOutput as List<com.wangmuy.llmchain.agent.IntermediateStep>)
+            intermediateSteps.addAll(nextStepOutput as List<IntermediateStep>)
             if (nextStepOutput.size == 1) {
                 val nextStepAction = nextStepOutput[0]
                 val toolReturn = getToolReturn(nextStepAction)
@@ -105,7 +105,7 @@ class AgentExecutor @JvmOverloads constructor(
         return onReturn(output, intermediateSteps)
     }
 
-    private fun getToolReturn(nextStepOutput: com.wangmuy.llmchain.agent.IntermediateStep): AgentFinish? {
+    private fun getToolReturn(nextStepOutput: IntermediateStep): AgentFinish? {
         val agentAction = nextStepOutput.action
         val observation = nextStepOutput.observation
         val tool = this.tools.find { it.name == agentAction.tool }

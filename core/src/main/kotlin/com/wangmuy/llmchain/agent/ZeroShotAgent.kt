@@ -11,7 +11,7 @@ import java.util.regex.Pattern
 class ZeroShotAgent(
     llmChain: LLMChain,
     allowedTools: List<String>
-): com.wangmuy.llmchain.agent.Agent(llmChain, allowedTools) {
+): Agent(llmChain, allowedTools) {
     companion object {
         private const val FINAL_ANSWER_ACTION = "Final Answer:"
 
@@ -55,7 +55,7 @@ Thought:{agent_scratchpad}"""
         return Pair(action, actionInput)
     }
 
-    class PromptBuilder(): com.wangmuy.llmchain.agent.Agent.PromptBuilder<PromptBuilder, PromptTemplate>() {
+    class PromptBuilder(): Agent.PromptBuilder<PromptBuilder, PromptTemplate>() {
         private var tools: List<BaseTool>? = null
         private var prefix: String = PROMPT_PREFIX
         private var suffix: String = PROMPT_SUFFIX
@@ -104,7 +104,7 @@ Thought:{agent_scratchpad}"""
 
     }
 
-    class Builder(): com.wangmuy.llmchain.agent.Agent.Builder<Builder, ZeroShotAgent>() {
+    class Builder(): Agent.Builder<Builder, ZeroShotAgent>() {
         private var llm: BaseLanguageModel? = null
         private var tools: List<BaseTool>? = null
         private var callbackManager: BaseCallbackManager? = null

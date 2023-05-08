@@ -25,7 +25,7 @@ class Factory {
             tools: List<BaseTool>,
             agentType: String,
             callbackManager: BaseCallbackManager?,
-            args: Map<String, Any>?): com.wangmuy.llmchain.agent.Agent {
+            args: Map<String, Any>?): Agent {
             when (agentType) {
                 AGENT_TYPE_ZERO_SHOT_REACT_DESCRIPTION -> {
                     return ZeroShotAgent.Builder().llm(llm).tools(tools).also {
