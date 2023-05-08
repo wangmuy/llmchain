@@ -6,10 +6,10 @@ import com.wangmuy.llmchain.schema.LLMResult
 import com.wangmuy.llmchain.schema.PromptValue
 
 abstract class BaseLLM @JvmOverloads constructor(
-    val verbose: Boolean = false
-): BaseLanguageModel(), (String, List<String>?) -> String {
+    val verbose: Boolean = false,
+    callbackManager: BaseCallbackManager? = null
+): BaseLanguageModel(callbackManager), (String, List<String>?) -> String {
     private var cache: Boolean = false
-    var callbackManager: BaseCallbackManager? = null
 
     override fun generatePrompt(prompts: List<PromptValue>, stop: List<String>?): LLMResult {
         val promptStrings = prompts.map { it.asString() }.toCollection(mutableListOf())
@@ -20,9 +20,11 @@ abstract class BaseLLM @JvmOverloads constructor(
 
     fun generate(prompts: List<String>, stop: List<String>?): LLMResult {
         if (!cache) {
-            callbackManager?.onLLMStart(mapOf("name" to javaClass.simpleName), prompts, verbose)
+            callbackManager?.onLLMStart(mapOf("name" to javaClass.name), prompts, verbose)
             try {
-                return onGenerate(prompts, stop)
+                val output = onGenerate(prompts, stop)
+                callbackManager?.onLLMEnd(output, verbose)
+                return output
             } catch (e: Exception) {
                 callbackManager?.onLLMError(e, verbose)
                 throw e

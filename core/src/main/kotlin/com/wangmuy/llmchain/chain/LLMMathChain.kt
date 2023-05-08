@@ -33,7 +33,7 @@ class LLMMathChain @JvmOverloads constructor(
         val llmExecutor = LLMChain(prompt, llm)
         callbackManager?.onText(inputs!![inputKey] as String, verbose)
         val result = llmExecutor.predict(mapOf(
-            KEY_QUESTION to inputs!![inputKey]!!,
+            KEY_QUESTION to inputs!![inputKey]!!
 //            "stop" to listOf("```output") // if use actual math expression evaluation
         ))
         return procesLLMResult(result)
@@ -44,7 +44,7 @@ class LLMMathChain @JvmOverloads constructor(
             return Tool(
                 "Calculator",
                 description = "Useful for when you need to answer questions about math.",
-                func = {input -> LLMMathChain(llm).run(mapOf(KEY_QUESTION to input))},
+                func = {input -> LLMMathChain(llm).run(mapOf(KEY_QUESTION to input))}
                 )
         }
 

@@ -17,7 +17,7 @@ abstract class BaseTool @JvmOverloads constructor(
 
     fun run(toolInput: String, verbose: Boolean = false, args: Map<String, Any>? = null): String {
         callbackManager?.onToolStart(mapOf(
-            "name" to javaClass.simpleName, "description" to description), toolInput, verbose)
+            "name" to javaClass.name, "description" to description), toolInput, verbose)
         try {
             val observation = onRun(toolInput)
             callbackManager?.onToolEnd(observation, verbose)

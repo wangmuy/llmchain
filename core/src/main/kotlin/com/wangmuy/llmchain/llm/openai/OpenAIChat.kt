@@ -5,6 +5,7 @@ import com.theokanning.openai.completion.chat.ChatCompletionRequest
 import com.theokanning.openai.completion.chat.ChatMessage
 import com.theokanning.openai.completion.chat.ChatMessageRole
 import com.theokanning.openai.service.OpenAiService
+import com.wangmuy.llmchain.callback.BaseCallbackManager
 import com.wangmuy.llmchain.llm.BaseLLM
 import com.wangmuy.llmchain.schema.Generation
 import com.wangmuy.llmchain.schema.LLMResult
@@ -22,10 +23,12 @@ class OpenAIChat @JvmOverloads constructor(
         REQ_USER_NAME to "test",
         REQ_MODEL_NAME to "gpt-3.5-turbo",
         REQ_MAX_TOKENS to 50,
-        REQ_N to 1,
+        REQ_N to 1
     ),
+    callbackManager: BaseCallbackManager? = null,
+    verbose: Boolean = false,
     private val proxy: Proxy? = null
-): BaseLLM() {
+): BaseLLM(verbose, callbackManager) {
     companion object {
         const val REQ_MODEL_NAME = "model_name"
         const val REQ_USER_NAME = "user_name"
@@ -77,7 +80,7 @@ class OpenAIChat @JvmOverloads constructor(
     }
 
     override fun onGenerate(prompts: List<String>, stop: List<String>?): LLMResult {
-        println("prompt=\n${prompts[0]}")
+        //println("prompt=\n${prompts[0]}")
         initIfNeed()
         val messages = getChatParams(prompts, stop)
         val builder = ChatCompletionRequest.builder()
@@ -117,6 +120,7 @@ class OpenAIChat @JvmOverloads constructor(
         }
         // TODO retry
         val response = service.createChatCompletion(builder.build())
+        //println("rsp=\n${response.choices[0].message.content}")
         return LLMResult(
             listOf(listOf(Generation(response.choices[0].message.content))),
             mapOf(

@@ -1,5 +1,7 @@
 package com.wangmuy.llmchain.schema
 
+import com.wangmuy.llmchain.callback.BaseCallbackManager
+
 open class BaseAgentAction(val log: String)
 
 class AgentAction(
@@ -77,7 +79,7 @@ abstract class PromptValue {
     abstract  fun asMessage(): List<BaseMessage>
 }
 
-abstract class BaseLanguageModel {
+abstract class BaseLanguageModel(var callbackManager: BaseCallbackManager? = null) {
     abstract fun generatePrompt(
             prompts: List<PromptValue>, stop: List<String>?): LLMResult
 }

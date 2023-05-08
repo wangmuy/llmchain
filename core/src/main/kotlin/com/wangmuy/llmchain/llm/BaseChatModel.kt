@@ -5,8 +5,8 @@ import com.wangmuy.llmchain.schema.*
 
 abstract class BaseChatModel @JvmOverloads constructor(
     val verbose: Boolean = false,
-    var callbackManager: BaseCallbackManager? = null
-): BaseLanguageModel(), (List<BaseMessage>, List<String>?) -> BaseMessage {
+    callbackManager: BaseCallbackManager? = null
+): BaseLanguageModel(callbackManager), (List<BaseMessage>, List<String>?) -> BaseMessage {
     protected open fun combineLLMOutputs(llmOutputs: List<Map<String, String>>): Map<String, String> {
         return emptyMap()
     }
@@ -21,7 +21,7 @@ abstract class BaseChatModel @JvmOverloads constructor(
     override fun generatePrompt(prompts: List<PromptValue>, stop: List<String>?): LLMResult {
         val promptMessages = prompts.map { it.asMessage() }
         val promptStrings = prompts.map { it.asString() }
-        callbackManager?.onLLMStart(mapOf("name" to javaClass.simpleName), promptStrings, verbose)
+        callbackManager?.onLLMStart(mapOf("name" to javaClass.name), promptStrings, verbose)
         try {
             val output = generate(promptMessages, stop)
             callbackManager?.onLLMEnd(output, verbose)

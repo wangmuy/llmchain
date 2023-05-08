@@ -8,12 +8,16 @@ abstract class Chain @JvmOverloads constructor(
     var callbackManager: BaseCallbackManager? = null,
     val verbose: Boolean = false
 ): (Map<String, Any>?) -> Map<String, Any> {
+    companion object {
+        const val KEY_NAME = "name"
+    }
+
     abstract fun inputKeys(): List<String>?
     abstract fun outputKeys(): List<String>
     abstract fun onInvoke(inputs: Map<String, Any>?): Map<String, Any> // _call
     override fun invoke(inputs: Map<String, Any>?): Map<String, Any> {// __call__
         val inputsPrep = prepInputs(inputs)
-        callbackManager?.onChainStart(mapOf("name" to javaClass.simpleName), inputs, verbose)
+        callbackManager?.onChainStart(mapOf(KEY_NAME to javaClass.name), inputsPrep, verbose)
         try {
             val outputs = onInvoke(inputsPrep)
             callbackManager?.onChainEnd(outputs, verbose)
@@ -39,7 +43,7 @@ abstract class Chain @JvmOverloads constructor(
     fun prepInputs(inputs: Map<String, Any>?): Map<String, Any> {
         val inputsNotNull = inputs ?: emptyMap()
         val externalContext = memory?.loadMemoryVariables(inputsNotNull) ?: mutableMapOf()
-        return externalContext.toMutableMap().also { it.putAll(inputsNotNull) }
+        return inputsNotNull.toMutableMap().also { it.putAll(externalContext) }
     }
 
     open fun apply(inputList: List<Map<String, Any>>): List<Map<String, Any>> {

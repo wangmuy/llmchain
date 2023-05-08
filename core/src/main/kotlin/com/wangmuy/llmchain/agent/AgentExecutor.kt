@@ -34,7 +34,7 @@ class AgentExecutor @JvmOverloads constructor(
     }
 
     private fun shouldContinue(iterations: Int, timeElapsed: Long): Boolean {
-        if (maxIterations != null && iterations > maxIterations!!) {
+        if (maxIterations != null && iterations >= maxIterations!!) {
             return false
         }
         return maxExecutionTime == null || timeElapsed < maxExecutionTime!!

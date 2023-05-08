@@ -62,6 +62,13 @@ Thought:{agent_scratchpad}"""
         private var formatInstructions: String = PROMPT_FORMAT_INSTRUCTIONS
         private var inputVariables: List<String>? = null
 
+        companion object {
+            const val KEY_PREFIX = "prefix"
+            const val KEY_SUFFIX = "suffix"
+            const val KEY_FORMAT_INSTRUCTIONS = "formatInstructions"
+            const val KEY_INPUT_VARIABLES = "inputVariables"
+        }
+
         override fun self(): PromptBuilder {
             return this
         }
@@ -97,7 +104,7 @@ Thought:{agent_scratchpad}"""
             val formatInstructions = this.formatInstructions.fStringFormat(mapOf("tool_names" to toolNames))
             val template = listOf(prefix, toolStrings, formatInstructions, suffix).joinToString("\n\n")
             if (inputVariables == null) {
-                inputVariables = listOf("input", "agent_scratchpad")
+                inputVariables = listOf("input", AGENT_SCRATCHPAD)
             }
             return PromptTemplate(inputVariables!!, template)
         }
@@ -140,8 +147,18 @@ Thought:{agent_scratchpad}"""
         }
 
         override fun build(): ZeroShotAgent {
+            if (args != null) {
+                args!![PromptBuilder.KEY_PREFIX]?.also { promptBuilder.prefix(it as String) }
+                args!![PromptBuilder.KEY_SUFFIX]?.also { promptBuilder.suffix(it as String) }
+                args!![PromptBuilder.KEY_FORMAT_INSTRUCTIONS]?.also { promptBuilder.formatInstructions(it as String) }
+                args!![PromptBuilder.KEY_INPUT_VARIABLES]?.also { promptBuilder.inputVariables(it as List<String>) }
+            }
+            val llmNonNull = llm!!
+            if (callbackManager != null && llmNonNull.callbackManager == null) {
+                llmNonNull.callbackManager = callbackManager
+            }
             val prompt = promptBuilder.tools(tools!!).build()
-            val llmChain = LLMChain(prompt, llm!!, callbackManager = callbackManager)
+            val llmChain = LLMChain(prompt, llmNonNull, callbackManager = callbackManager)
             val toolNames = tools?.map { it.name } ?: emptyList()
             return ZeroShotAgent(llmChain, toolNames)
         }
