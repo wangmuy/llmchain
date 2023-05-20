@@ -30,13 +30,13 @@ open class DefaultCallbackHandler: BaseCallbackHandler {
     override fun onChainError(error: Throwable, verbose: Boolean) {
     }
 
-    override fun onToolStart(serialized: Map<String, Any>, inputStr: String, verbose: Boolean) {
+    override fun onToolStart(serialized: Map<String, Any>, inputStr: String, verbose: Boolean, args: Map<String, Any>?) {
     }
 
-    override fun onToolEnd(output: String, verbose: Boolean) {
+    override fun onToolEnd(output: String, verbose: Boolean, args: Map<String, Any>?) {
     }
 
-    override fun onToolError(error: Throwable, verbose: Boolean) {
+    override fun onToolError(error: Throwable, verbose: Boolean, args: Map<String, Any>?) {
     }
 
     override fun onText(text: String, verbose: Boolean) {

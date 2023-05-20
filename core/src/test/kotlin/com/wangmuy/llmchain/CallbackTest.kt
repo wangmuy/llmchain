@@ -76,17 +76,17 @@ class FakeCallbackHandler(): BaseFakeCallbackHandler() {
         errors += 1
     }
 
-    override fun onToolStart(serialized: Map<String, Any>, inputStr: String, verbose: Boolean) {
+    override fun onToolStart(serialized: Map<String, Any>, inputStr: String, verbose: Boolean, args: Map<String, Any>?) {
         toolStarts += 1
         starts += 1
     }
 
-    override fun onToolEnd(output: String, verbose: Boolean) {
+    override fun onToolEnd(output: String, verbose: Boolean, args: Map<String, Any>?) {
         toolEnds += 1
         ends += 1
     }
 
-    override fun onToolError(error: Throwable, verbose: Boolean) {
+    override fun onToolError(error: Throwable, verbose: Boolean, args: Map<String, Any>?) {
         errors += 1
     }
 

@@ -29,7 +29,7 @@ object Util {
     }
 }
 
-class ChatMessageHistory @JvmOverloads constructor(
+open class ChatMessageHistory @JvmOverloads constructor(
     messages: MutableList<BaseMessage> = mutableListOf()
 ): BaseChatMessageHistory(messages)
 
@@ -58,7 +58,7 @@ abstract class BaseChatMemory @JvmOverloads constructor(
     }
 }
 
-class ConversationBufferMemory @JvmOverloads constructor(
+open class ConversationBufferMemory @JvmOverloads constructor(
     val humanPrefix: String = "Human",
     val aiPrefix: String = "AI",
     val memoryKey: String = "history"

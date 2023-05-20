@@ -5,7 +5,7 @@ import java.util.regex.Pattern
 const val TEMPLATE_FORMAT_FSTRING = "f-string"
 private val FSTRING_PATTERN = Pattern.compile("\\{\\w+\\}")
 
-fun String.fStringFormat(params: Map<String, Any>?): String {
+fun String.fStringFormat(params: Map<String, Any>?, replaceNotExist: Boolean = true): String {
     if (params == null) {
         return this
     }
@@ -14,7 +14,11 @@ fun String.fStringFormat(params: Map<String, Any>?): String {
     while (matcher.find()) {
         val keyWithParens = matcher.group()
         val key = keyWithParens.substring(1, keyWithParens.length-1)
-        matcher.appendReplacement(sb, params[key].toString())
+        val replaceStr = if (replaceNotExist || key in params)
+            params[key].toString()
+        else
+            keyWithParens
+        matcher.appendReplacement(sb, replaceStr)
     }
     matcher.appendTail(sb)
     return sb.toString()

@@ -44,7 +44,7 @@ class LLMMathChain @JvmOverloads constructor(
             return Tool(
                 "Calculator",
                 description = "Useful for when you need to answer questions about math.",
-                func = {input -> LLMMathChain(llm).run(mapOf(KEY_QUESTION to input))}
+                func = {input, _ -> LLMMathChain(llm).run(mapOf(KEY_QUESTION to input))}
                 )
         }
 

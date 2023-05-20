@@ -4,7 +4,7 @@ import com.wangmuy.llmchain.schema.AgentAction
 import com.wangmuy.llmchain.schema.AgentFinish
 import com.wangmuy.llmchain.schema.LLMResult
 
-class CallbackManager(
+open class CallbackManager(
         private var handlers: MutableList<BaseCallbackHandler>
 ): BaseCallbackManager() {
     override fun addHandler(callback: BaseCallbackHandler) {
@@ -76,7 +76,7 @@ class CallbackManager(
         }
     }
 
-    override fun onToolStart(serialized: Map<String, Any>, inputStr: String, verbose: Boolean) {
+    override fun onToolStart(serialized: Map<String, Any>, inputStr: String, verbose: Boolean, args: Map<String, Any>?) {
         for (h in handlers) {
             if (!h.ignoreAgent() && (verbose || h.alwaysVerbose())) {
                 h.onToolStart(serialized, inputStr, verbose)
@@ -84,7 +84,7 @@ class CallbackManager(
         }
     }
 
-    override fun onToolEnd(output: String, verbose: Boolean) {
+    override fun onToolEnd(output: String, verbose: Boolean, args: Map<String, Any>?) {
         for (h in handlers) {
             if (!h.ignoreAgent() && (verbose || h.alwaysVerbose())) {
                 h.onToolEnd(output, verbose)
@@ -92,7 +92,7 @@ class CallbackManager(
         }
     }
 
-    override fun onToolError(error: Throwable, verbose: Boolean) {
+    override fun onToolError(error: Throwable, verbose: Boolean, args: Map<String, Any>?) {
         for (h in handlers) {
             if (!h.ignoreAgent() && (verbose || h.alwaysVerbose())) {
                 h.onToolError(error, verbose)

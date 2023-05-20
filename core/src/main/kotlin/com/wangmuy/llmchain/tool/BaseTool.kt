@@ -8,22 +8,22 @@ abstract class BaseTool @JvmOverloads constructor(
     val returnDirect: Boolean = false,
     val verbose: Boolean = false,
     var callbackManager: BaseCallbackManager? = null
-): (String) -> String {
-    protected abstract fun onRun(toolInput: String): String // _run
+): (String, Map<String, Any>?) -> String {
+    protected abstract fun onRun(toolInput: String, args: Map<String, Any>?): String // _run
 
-    override fun invoke(toolInput: String): String {
-        return onRun(toolInput)
+    override fun invoke(toolInput: String, args: Map<String, Any>?): String {
+        return run(toolInput, verbose, args)
     }
 
     fun run(toolInput: String, verbose: Boolean = false, args: Map<String, Any>? = null): String {
         callbackManager?.onToolStart(mapOf(
-            "name" to javaClass.name, "description" to description), toolInput, verbose)
+            "name" to javaClass.name, "description" to description), toolInput, verbose, args)
         try {
-            val observation = onRun(toolInput)
-            callbackManager?.onToolEnd(observation, verbose)
+            val observation = onRun(toolInput, args)
+            callbackManager?.onToolEnd(observation, verbose, args)
             return observation
         } catch (e: Exception) {
-            callbackManager?.onToolError(e, verbose)
+            callbackManager?.onToolError(e, verbose, args)
             throw e
         }
     }

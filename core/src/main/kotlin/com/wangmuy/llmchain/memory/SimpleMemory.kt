@@ -2,7 +2,7 @@ package com.wangmuy.llmchain.memory
 
 import com.wangmuy.llmchain.schema.BaseMemory
 
-class SimpleMemory @JvmOverloads constructor(
+open class SimpleMemory @JvmOverloads constructor(
     val memories: MutableMap<String, Any> = HashMap()): BaseMemory() {
     override fun memoryVariables(): List<String> {
         return memories.keys.toList()

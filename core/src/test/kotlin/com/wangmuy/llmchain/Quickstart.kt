@@ -54,7 +54,7 @@ class QuickstartModel {
         val fakeSerpApiTool = Tool(
             name = "Search",
             description = "A search engine. Useful for when you need to answer questions about current events. Input should be a search query.",
-            func = {_ -> "San Francisco Temperature Yesterday. Maximum temperature yesterday: 57 °F (at 1:56 pm) Minimum temperature yesterday: 49 °F (at 1:56 am)"}
+            func = {_, _ -> "San Francisco Temperature Yesterday. Maximum temperature yesterday: 57 °F (at 1:56 pm) Minimum temperature yesterday: 49 °F (at 1:56 am)"}
         )
         val llmMathTool = LLMMathChain.asTool(llm)
         val agentExecutor = Factory.initializeAgent(listOf(fakeSerpApiTool, llmMathTool), llm,

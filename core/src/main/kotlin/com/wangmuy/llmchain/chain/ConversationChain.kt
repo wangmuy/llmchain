@@ -7,7 +7,7 @@ import com.wangmuy.llmchain.schema.BaseLanguageModel
 import com.wangmuy.llmchain.schema.BaseMemory
 import java.util.*
 
-class ConversationChain @JvmOverloads constructor(
+open class ConversationChain @JvmOverloads constructor(
     llm: BaseLanguageModel,
     prompt: BasePromptTemplate = PROMPT,
     memory: BaseMemory = ConversationBufferMemory(),

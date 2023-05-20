@@ -8,7 +8,7 @@ import com.wangmuy.llmchain.schema.BaseAgentAction
 import com.wangmuy.llmchain.tool.BaseTool
 import java.util.*
 
-class AgentExecutor @JvmOverloads constructor(
+open class AgentExecutor @JvmOverloads constructor(
     val agent: BaseAgent,
     val tools: List<BaseTool>,
     callbackManager: BaseCallbackManager?,

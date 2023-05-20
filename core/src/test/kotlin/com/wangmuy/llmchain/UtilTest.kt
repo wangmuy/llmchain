@@ -14,6 +14,8 @@ class UtilTest {
         assertEquals("hello world", "hello {abc}d".fStringFormat(mapOf("abc" to "worl")))
         assertEquals("hello world", "hello world".fStringFormat(mapOf("abc" to "aaa")))
         assertEquals("hello world", "hello {a_bc}".fStringFormat(mapOf("a_bc" to "world")))
+        assertEquals("hello null", "hello {abc}".fStringFormat(mapOf("def" to "ggg")))
+        assertEquals("hello {abc}", "hello {abc}".fStringFormat(mapOf("def" to "ggg"), replaceNotExist = false))
     }
 
     @Test fun stringTest() {

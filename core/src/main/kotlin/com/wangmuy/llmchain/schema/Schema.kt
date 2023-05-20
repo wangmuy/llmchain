@@ -4,13 +4,13 @@ import com.wangmuy.llmchain.callback.BaseCallbackManager
 
 open class BaseAgentAction(val log: String)
 
-class AgentAction(
+open class AgentAction(
     val tool: String,
     val toolInput: String,
     log: String
 ): BaseAgentAction(log)
 
-class AgentFinish(
+open class AgentFinish(
     val returnValues: Map<String, Any>,
     log: String
 ): BaseAgentAction(log)
@@ -33,7 +33,7 @@ open class BaseMessage @JvmOverloads constructor(
     }
 }
 
-class HumanMessage @JvmOverloads constructor(
+open class HumanMessage @JvmOverloads constructor(
     content: String, additionalArgs: Map<String, String>? = null)
     : BaseMessage(content, additionalArgs) {
     override fun msgType(): String {
@@ -41,7 +41,7 @@ class HumanMessage @JvmOverloads constructor(
     }
 }
 
-class AIMessage @JvmOverloads constructor(
+open class AIMessage @JvmOverloads constructor(
     content: String, additionalArgs: Map<String, String>? = null)
     : BaseMessage(content, additionalArgs) {
     override fun msgType(): String {
@@ -49,7 +49,7 @@ class AIMessage @JvmOverloads constructor(
     }
 }
 
-class SystemMessage @JvmOverloads constructor(
+open class SystemMessage @JvmOverloads constructor(
     content: String, additionalArgs: Map<String, String>? = null)
     : BaseMessage(content, additionalArgs) {
     override fun msgType(): String {
@@ -57,7 +57,7 @@ class SystemMessage @JvmOverloads constructor(
     }
 }
 
-class ChatMessage @JvmOverloads constructor(
+open class ChatMessage @JvmOverloads constructor(
     val role: String, content: String, additionalArgs: Map<String, String>? = null)
     : BaseMessage(content, additionalArgs) {
     override fun msgType(): String {
@@ -65,9 +65,9 @@ class ChatMessage @JvmOverloads constructor(
     }
 }
 
-class ChatGeneration(text: String, val message: BaseMessage): Generation(text)
+open class ChatGeneration(text: String, val message: BaseMessage): Generation(text)
 
-class ChatResult(val generations: List<ChatGeneration>, val llmOutput: Map<String, String>?)
+open class ChatResult(val generations: List<ChatGeneration>, val llmOutput: Map<String, String>?)
 
 open class LLMResult @JvmOverloads constructor(
         val generations: List<List<Generation>>,

@@ -30,8 +30,8 @@ class AgentTest {
         )
         val fakeLLM = FakeListLLM(responses)
         val tools = listOf(
-            Tool("Search", {x -> x},  "Useful for searching"),
-            Tool("Lookup", {x -> x}, "Useful for looking up things in a table")
+            Tool("Search", {x, _ -> x},  "Useful for searching"),
+            Tool("Lookup", {x, _ -> x}, "Useful for looking up things in a table")
         )
         return initializeAgent(tools, fakeLLM, AGENT_TYPE_ZERO_SHOT_REACT_DESCRIPTION, null, args)
     }
@@ -47,7 +47,7 @@ class AgentTest {
             "FooBarBaz\nAction: Search\nAction Input: misalignment"
         ))
         val tools = listOf(
-            Tool("Search", {x -> x}, "Useful for searching", true)
+            Tool("Search", {x, _ -> x}, "Useful for searching", true)
         )
         val agent = initializeAgent(tools, fakeLLM, AGENT_TYPE_ZERO_SHOT_REACT_DESCRIPTION)
         assertEquals(tools[0], agent.lookupTool("Search"))

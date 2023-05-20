@@ -8,7 +8,7 @@ import com.wangmuy.llmchain.schema.BaseAgentAction
 import com.wangmuy.llmchain.schema.BaseMessage
 import java.util.*
 
-class IntermediateStep(
+open class IntermediateStep(
     val action: AgentAction,
     val observation: String): BaseAgentAction(action.log)
 
@@ -72,7 +72,7 @@ abstract class Agent @JvmOverloads constructor(
         )
     }
 
-    private fun constructScratchpad(intermediateSteps: List<IntermediateStep>): String {
+    protected open fun constructScratchpad(intermediateSteps: List<IntermediateStep>): String {
         val thoughtsSb = StringBuilder()
         for (step in intermediateSteps) {
             thoughtsSb.append(step.action.log)
@@ -112,7 +112,7 @@ abstract class Agent @JvmOverloads constructor(
         return args?.toMutableMap()?.also { it.putAll(newInputs) } ?: newInputs
     }
 
-    fun finishToolName(): String {
+    protected fun finishToolName(): String {
         return "Final Answer"
     }
 
@@ -173,5 +173,12 @@ abstract class Agent @JvmOverloads constructor(
                         "got $earlyStoppingMethod")
             }
         }
+    }
+
+    override fun toolRunLoggingArgs(): Map<String, Any> {
+        return mapOf(
+            "llm_prefix" to llmPrefix(),
+            "observation_prefix" to observationPrefix()
+        )
     }
 }
