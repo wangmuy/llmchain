@@ -4,7 +4,7 @@ import com.wangmuy.llmchain.schema.BaseMessage
 import com.wangmuy.llmchain.schema.HumanMessage
 import com.wangmuy.llmchain.schema.PromptValue
 
-class StringPromptValue(
+open class StringPromptValue(
         val text: String
 ): PromptValue() {
     override fun asString(): String {

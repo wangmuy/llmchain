@@ -66,10 +66,15 @@ open class LLMChain @JvmOverloads constructor(
         for (generation in response.generations) {
             outputs.add(mapOf(outputKey to generation[0].text))
         }
-        return outputs
+        // apply_and_parse
+        return prompt.outputParser?.let {parser->
+            outputs.map { it.mapValues {entry-> parser.parse(entry.value)} }
+        } ?: outputs
     }
 
     fun predict(inputs: Map<String, Any>): String {
-        return invoke(inputs)[outputKey]!!.toString()
+        // predict_and_parse
+        val result = invoke(inputs)[outputKey]!!.toString()
+        return prompt.outputParser?.parse(result) ?: result
     }
 }

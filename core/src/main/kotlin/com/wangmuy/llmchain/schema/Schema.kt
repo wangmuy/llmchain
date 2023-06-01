@@ -81,7 +81,7 @@ abstract class PromptValue {
 
 abstract class BaseLanguageModel(var callbackManager: BaseCallbackManager? = null) {
     abstract fun generatePrompt(
-            prompts: List<PromptValue>, stop: List<String>?): LLMResult
+        prompts: List<PromptValue>, stop: List<String>?): LLMResult
 }
 
 abstract class BaseMemory {
@@ -106,4 +106,36 @@ abstract class BaseChatMessageHistory @JvmOverloads constructor(
     }
 }
 
-abstract class Document(val pageContent: String, val metadata: Map<String, Any>)
+open class Document(val pageContent: String, val metadata: Map<String, Any>? = null) {
+    override fun equals(other: Any?): Boolean {
+        return other is Document && other.pageContent == pageContent && other.metadata == metadata
+    }
+
+    override fun hashCode(): Int {
+        var result = pageContent.hashCode()
+        result = 31 * result + (metadata?.hashCode() ?: 0)
+        return result
+    }
+
+    override fun toString(): String {
+        return "Document(pageContent='$pageContent', metadata=$metadata)"
+    }
+}
+
+interface BaseRetriever {
+    fun getRelevantDocuments(query: String): List<Document>
+}
+
+interface BaseOutputParser<T> {
+    @Throws(OutputParserException::class)
+    fun parse(text: String): T
+
+    @Throws(OutputParserException::class)
+    fun parseWithPrompt(completion: String, prompt: PromptValue): T {
+        return parse(completion)
+    }
+
+    fun getFormatInstructions(): String
+}
+
+class OutputParserException(message: String = "", cause: Throwable?): Exception(message, cause)

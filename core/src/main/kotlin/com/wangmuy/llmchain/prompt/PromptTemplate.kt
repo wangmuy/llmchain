@@ -1,11 +1,14 @@
 package com.wangmuy.llmchain.prompt
 
-class PromptTemplate @JvmOverloads constructor(
+import com.wangmuy.llmchain.schema.BaseOutputParser
+
+open class PromptTemplate @JvmOverloads constructor(
     inputVariables: List<String>,
     private val template: String,
+    outputParser: BaseOutputParser<String>? = null,
     private val templateFormat: String = TEMPLATE_FORMAT_FSTRING,
     private val validateTemplate: Boolean = true
-): StringPromptTemplate(inputVariables) {
+): StringPromptTemplate(inputVariables, outputParser) {
     override fun format(args: Map<String, Any>?): String {
         val argStrings = args?.mapValues {entry ->
             when (entry.value) {
