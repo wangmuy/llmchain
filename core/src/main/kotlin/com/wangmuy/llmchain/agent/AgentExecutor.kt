@@ -60,10 +60,12 @@ open class AgentExecutor @JvmOverloads constructor(
         }
         val actions = listOf(output as AgentAction)
         val result = mutableListOf<IntermediateStep>()
+        val loNameToToolMap = nameToToolMap.mapKeys { it.key.lowercase(Locale.ROOT) }
         for (agentAction in actions) {
             callbackManager?.onAgentAction(agentAction, verbose)
-            val observation = if (nameToToolMap.containsKey(agentAction.tool)) {
-                val tool = nameToToolMap[agentAction.tool]!!
+            val loToolName = agentAction.tool.lowercase(Locale.ROOT)
+            val observation = if (loNameToToolMap.containsKey(loToolName)) {
+                val tool = loNameToToolMap[loToolName]!!
                 var toolRunArgs = agent.toolRunLoggingArgs()
                 if (tool.returnDirect) {
                     toolRunArgs = toolRunArgs.toMutableMap().also { it["llm_prefix"] = "" }
