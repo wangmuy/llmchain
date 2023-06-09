@@ -1,6 +1,4 @@
 repositories {
     mavenCentral()
+    google()
 }
-
-group = "com.wangmuy"
-version = "1.0-SNAPSHOT"

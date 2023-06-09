@@ -1,0 +1,273 @@
+apply plugin: 'maven-publish'
+// https://stackoverflow.com/a/42160584
+
+private def readPropertyFromLocalProperties(String key) {
+    Properties properties = new Properties()
+    try {
+        properties.load(project.rootProject.file('local.properties').newDataInputStream())
+    } catch (Exception e) {
+        println("load local properties failed msg:${e.message}")
+    }
+    return properties.getProperty(key)
+}
+
+private def isReleaseBuild(ver) {
+    return !ver.toString().contains("SNAPSHOT")
+}
+
+private def getPropertyMaybeLocal(String propName) {
+    return hasProperty(propName)? project.property(propName) : readPropertyFromLocalProperties(propName)
+}
+
+private static def nullOrEmpty(String str) {
+    return str == null || "" == str.trim()
+}
+
+def PUBLISH_TYPE = getPropertyMaybeLocal('PUBLISH_TYPE')
+if (PUBLISH_TYPE != "java" && PUBLISH_TYPE != "aar") {
+    throw new IllegalArgumentException("PUBLISH_TYPE must be java or aar")
+}
+
+// https://github.com/xvik/gradle-java-lib-plugin/blob/master/README.md
+// disable: publishPluginMavenPublicationToMavenLocal and publishPluginMavenPublicationToMavenRepository
+tasks.withType(AbstractPublishToMaven) { Task task ->
+    if (task.name.startsWith("publishPluginMaven")) {
+        task.enabled(false)
+    }
+}
+
+def packageDoc = null
+if (PUBLISH_TYPE == "java") {
+    task packageSources(type: Jar, dependsOn: 'classes') {
+        from sourceSets.main.allSource
+        classifier = 'sources'
+    }
+
+    task packageJavadoc(type: Jar, dependsOn: 'javadoc') {
+        from javadoc.destinationDir
+        classifier = 'javadoc'
+    }
+
+    packageDoc = packageJavadoc
+
+    javadoc {
+        source = sourceSets.main.allJava
+        classpath = configurations.compileClasspath
+
+        options {
+            setMemberLevel JavadocMemberLevel.PUBLIC
+            setAuthor true
+            // links "https://docs.oracle.com/javase/8/docs/api/"
+        }
+    }
+} else if (PUBLISH_TYPE == "aar") {
+    task androidJavadocs(type: Javadoc) {
+        // https://stackoverflow.com/q/70517365
+//    source = android.sourceSets.main.java.srcDirs
+//    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+        android.libraryVariants.all { variant ->
+            if (variant.name == 'release') {
+                options.memberLevel = JavadocMemberLevel.PUBLIC
+                failOnError = false
+                source = variant.javaCompiler.source
+                classpath += files(variant.javaCompileProvider.get().classpath)
+//            def androidJar = "${android.sdkDirectory}/platforms/${android.compileSdkVersion}/android.jar"
+//            classpath += files(androidJar)
+                options.addStringOption('-ignore-source-errors', '-quiet')
+                options.addStringOption('Xdoclint:none', '-quiet')
+                options.addStringOption('encoding', 'UTF-8')
+                options.addStringOption('charSet', 'UTF-8')
+            }
+        }
+        exclude '**/R.html', '**/R.*.html', '**/index.html'
+    }
+
+    task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
+        archiveClassifier.set('javadoc')
+        from androidJavadocs.destinationDir
+    }
+    packageDoc = androidJavadocsJar
+}
+// prefer dokka if possible
+project.pluginManager.withPlugin("org.jetbrains.dokka") {
+    task dokkaJavadocJar(type: Jar, dependsOn: 'dokkaJavadoc') {
+        from dokkaJavadoc
+        archiveClassifier.set('javadoc')
+    }
+    packageDoc = dokkaJavadocJar
+}
+
+// load/set props into (e.g: gradle.properties)
+//  required:
+//   PUBLISH_TYPE=aar/java
+//   POM_GROUP_ID
+//   POM_ARTIFACT_ID
+//   version
+//  optional:
+//   POM_LICENCE_NAME
+//   POM_LICENCE_URL
+//   POM_LICENCE_DIST
+//   POM_DEVELOPER_ID
+//   POM_DEVELOPER_NAME
+//   POM_DEPENDENCY_EXCLUDES=comma separated list
+//   POM_SCM_URL
+//   POM_SCM_COMMIT
+// local.properties:
+//   PUBLISH_URL_RELEASE
+//   PUBLISH_URL_SNAPSHOT
+//   MAVEN_USERNAME
+//   MAVEN_PASSWORD
+afterEvaluate {
+    publishing {
+        publications {
+            "${PUBLISH_TYPE}"(MavenPublication) {
+                def versionName = getPropertyMaybeLocal("VERSION_NAME")
+                groupId POM_GROUP_ID
+                artifactId POM_ARTIFACT_ID
+                version versionName
+
+                def agpVersion = {
+                    def verClz = null
+                    try {
+                        verClz = Class.forName("com.android.builder.model.Version.Version")
+                    } catch (Throwable ignored) {}
+                    if (verClz == null) {
+                        try {
+                            verClz = Class.forName("com.android.Version")
+                        } catch (Throwable ignored) {}
+                    }
+                    try {
+                        def field = verClz.getDeclaredField("ANDROID_GRADLE_PLUGIN_VERSION")
+                        field.accessible = true
+                        String curVer = field.get(null)
+                        return curVer
+                    } catch (Throwable ignored) {
+//                        throw ignored
+                        return "7.0.0" //TODO
+                    }
+                }()
+
+                publishing.repositories.maven {
+                    def pubUrl = getPropertyMaybeLocal(isReleaseBuild(versionName)? 'PUBLISH_URL_RELEASE' : 'PUBLISH_URL_SNAPSHOT')
+                    def username = getPropertyMaybeLocal("MAVEN_USERNAME")
+                    def password = getPropertyMaybeLocal("MAVEN_PASSWORD")
+                    if (nullOrEmpty(pubUrl)) {
+                        println "ERROR!! need PUBLISH_URL_RELEASE or PUBLISH_URL_SNAPSHOT in gradle or local.properties"
+                    }
+                    if (pubUrl.startsWith("http") && (nullOrEmpty(username) || nullOrEmpty(password))) {
+                        println "ERROR!! need MAVEN_USERNAME and MAVEN_PASSWORD for ${pubUrl}"
+                    }
+                    url pubUrl
+                    if (pubUrl.startsWith("http")) {
+                        allowInsecureProtocol true
+                        authentication {
+                            credentials.username = username
+                            credentials.password = password
+                        }
+                    }
+                }
+
+                if (PUBLISH_TYPE == "java") {
+                    from components.java
+//                    artifact packageSources
+                    artifact packageDoc
+                } else if (PUBLISH_TYPE == "aar") {
+                    // if AGP >= 3.6.0, use
+                    if (agpVersion >= "3.6.0") {
+                        from components.release
+                        artifact packageDoc
+                    } else {
+                        // otherwise, if AGP < 3.6.0
+                        artifact packageDoc
+                        artifact bundleReleaseAar
+                        pom.withXml {
+                            final dependenciesNode = asNode().appendNode('dependencies')
+
+                            ext.addDependency = { Dependency dep, String scope ->
+                                if (dep.group == null || dep.version == null || dep.name == null || dep.name == "unspecified")
+                                    return // ignore invalid dependencies
+
+                                final dependencyNode = dependenciesNode.appendNode('dependency')
+                                dependencyNode.appendNode('groupId', dep.group)
+                                dependencyNode.appendNode('artifactId', dep.name)
+                                dependencyNode.appendNode('version', dep.version)
+                                dependencyNode.appendNode('scope', scope)
+
+                                if (!dep.transitive) {
+                                    // If this dependency is transitive, we should force exclude all its dependencies them from the POM
+                                    final exclusionNode = dependencyNode.appendNode('exclusions').appendNode('exclusion')
+                                    exclusionNode.appendNode('groupId', '*')
+                                    exclusionNode.appendNode('artifactId', '*')
+                                } else if (!dep.properties.excludeRules.empty) {
+                                    // Otherwise add specified exclude rules
+                                    final exclusionNode = dependencyNode.appendNode('exclusions').appendNode('exclusion')
+                                    dep.properties.excludeRules.each { ExcludeRule rule ->
+                                        exclusionNode.appendNode('groupId', rule.group ?: '*')
+                                        exclusionNode.appendNode('artifactId', rule.module ?: '*')
+                                    }
+                                }
+                            }
+
+                            // List all "compile" dependencies (for old Gradle)
+                            // configurations.compile.getDependencies().each { dep -> addDependency(dep, "compile") }
+                            // List all "api" dependencies (for new Gradle) as "compile" dependencies
+                            configurations.api.getDependencies().each { dep -> addDependency(dep, "compile") }
+                            // List all "implementation" dependencies (for new Gradle) as "runtime" dependencies
+                            configurations.implementation.getDependencies().each { dep -> addDependency(dep, "runtime") }
+                            configurations.runtimeOnly.getDependencies().each { dep -> addDependency(dep, "runtime") }
+                        } // pom.withXml
+                    }
+                }
+
+                def pomConfig = {
+                    def POM_SCM_URL = getPropertyMaybeLocal('POM_SCM_URL')
+                    def POM_SCM_COMMIT = getPropertyMaybeLocal('POM_SCM_COMMIT')
+                    if (!nullOrEmpty(POM_SCM_URL)) {
+                        scm {
+                            url POM_SCM_URL
+                            if (!nullOrEmpty(POM_SCM_COMMIT)) {
+                                tag POM_SCM_COMMIT
+                            }
+                        }
+                    }
+
+                    def POM_LICENCE_NAME = getPropertyMaybeLocal('POM_LICENCE_NAME')
+                    def POM_LICENCE_URL = getPropertyMaybeLocal('POM_LICENCE_URL')
+                    def POM_LICENCE_DIST = getPropertyMaybeLocal('POM_LICENCE_DIST')
+                    if (!nullOrEmpty(POM_LICENCE_NAME) && !nullOrEmpty(POM_LICENCE_URL) && !nullOrEmpty(POM_LICENCE_DIST)) {
+                        licenses {
+                            license {
+                                name POM_LICENCE_NAME
+                                url POM_LICENCE_URL
+                                distribution POM_LICENCE_DIST
+                            }
+                        }
+                    }
+
+                    def POM_DEVELOPER_ID = getPropertyMaybeLocal('POM_DEVELOPER_ID')
+                    def POM_DEVELOPER_NAME = getPropertyMaybeLocal('POM_DEVELOPER_NAME')
+                    if (!nullOrEmpty(POM_DEVELOPER_ID) && !nullOrEmpty(POM_DEVELOPER_NAME)) {
+                        developers {
+                            developer {
+                                id POM_DEVELOPER_ID
+                                name POM_DEVELOPER_NAME
+                            }
+                        }
+                    }
+                }
+                // append additional configurations
+                pom.withXml {
+                    def POM_DEPENDENCY_EXCLUDES = getPropertyMaybeLocal('POM_DEPENDENCY_EXCLUDES')
+                    if (!nullOrEmpty(POM_DEPENDENCY_EXCLUDES)) {
+                        asNode().dependencies.dependency.each { dep ->
+                            if (dep.artifactId.last().value() in POM_DEPENDENCY_EXCLUDES.split(",").collect{it.trim()}) {
+                                assert dep.parent().remove(dep)
+                            }
+                        }
+                    }
+                    asNode().children().last() + pomConfig
+                }
+            } // (MavenPublication)
+        }
+    }
+}

@@ -1,10 +1,13 @@
 plugins {
     kotlin("jvm") version "1.8.20"
     `java-library`
+    id("maven-publish")
+    id("org.jetbrains.dokka") version "1.8.10"
 }
 
 repositories {
     mavenCentral()
+    google()
 }
 
 dependencies {
@@ -29,3 +32,5 @@ tasks.test {
 kotlin {
     jvmToolchain(11)
 }
+
+apply(from = "../publish.gradle")
