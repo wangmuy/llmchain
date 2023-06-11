@@ -80,11 +80,11 @@ Thought:{agent_scratchpad}"""
     }
 
     open class PromptBuilder(): Agent.PromptBuilder<PromptBuilder, PromptTemplate>() {
-        private var tools: List<BaseTool>? = null
-        private var prefix: String = PROMPT_PREFIX
-        private var suffix: String = PROMPT_SUFFIX
-        private var formatInstructions: String = PROMPT_FORMAT_INSTRUCTIONS
-        private var inputVariables: List<String>? = null
+        var tools: List<BaseTool>? = null
+        var prefix: String = PROMPT_PREFIX
+        var suffix: String = PROMPT_SUFFIX
+        var formatInstructions: String = PROMPT_FORMAT_INSTRUCTIONS
+        var inputVariables: List<String>? = null
 
         companion object {
             const val KEY_PREFIX = "prefix"
@@ -123,16 +123,19 @@ Thought:{agent_scratchpad}"""
         }
 
         override fun build(): PromptTemplate {
-            val toolStrings = tools?.joinToString("\n") { "${it.name}: ${it.description}" } ?: ""
+            val toolStrings = buildToolStrings()
             val toolNames = tools?.joinToString(", ") { it.name } ?: ""
             val formatInstructions = this.formatInstructions.fStringFormat(mapOf("tool_names" to toolNames), false)
-            val template = listOf(prefix, toolStrings, formatInstructions, suffix).joinToString("\n\n")
+            val template = listOf(prefix, toolStrings, formatInstructions, suffix).joinToString("\n\n").trim()
             if (inputVariables == null) {
                 inputVariables = listOf("input", AGENT_SCRATCHPAD)
             }
             return PromptTemplate(inputVariables!!, template)
         }
 
+        open fun buildToolStrings(): String {
+            return tools?.joinToString("\n") { "${it.name}: ${it.description}" } ?: ""
+        }
     }
 
     open class Builder(): Agent.Builder<Builder, ZeroShotAgent>() {

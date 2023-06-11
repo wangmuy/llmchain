@@ -77,6 +77,9 @@ open class LLMResult @JvmOverloads constructor(
 abstract class PromptValue {
     abstract fun asString(): String
     abstract  fun asMessage(): List<BaseMessage>
+    override fun toString(): String {
+        return asString()
+    }
 }
 
 abstract class BaseLanguageModel(var callbackManager: BaseCallbackManager? = null) {

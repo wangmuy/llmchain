@@ -13,9 +13,16 @@ open class LLMChain @JvmOverloads constructor(
     val llm: BaseLanguageModel,
     memory: BaseMemory? = null,
     callbackManager: BaseCallbackManager? = null,
-    val outputKey: String = "text"
-): Chain(memory, callbackManager) {
+    val outputKey: String = "text",
+    verbose: Boolean = false,
+): Chain(memory, callbackManager, verbose) {
     private var mOutputKeys: String = "text"
+
+    init {
+        if (callbackManager != null && llm.callbackManager == null) {
+            llm.callbackManager = callbackManager
+        }
+    }
 
     override fun inputKeys(): List<String>? {
         return prompt.inputVariables

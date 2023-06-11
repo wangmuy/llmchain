@@ -61,11 +61,11 @@ abstract class Agent @JvmOverloads constructor(
 
     abstract fun extractToolAndInput(text: String): Pair<String, String>?
 
-    protected fun fixText(text: String): String {
+    protected open fun fixText(text: String): String {
         throw NotImplementedError("fix_text not implemented for this agent.")
     }
 
-    protected fun getStop(): List<String> {// _stop
+    protected open fun getStop(): List<String> {// _stop
         return listOf(
             "\n${observationPrefix().trimEnd()}",
             "\n\t${observationPrefix().trimEnd()}"
@@ -112,7 +112,7 @@ abstract class Agent @JvmOverloads constructor(
         return args?.toMutableMap()?.also { it.putAll(newInputs) } ?: newInputs
     }
 
-    protected fun finishToolName(): String {
+    protected open fun finishToolName(): String {
         return "Final Answer"
     }
 

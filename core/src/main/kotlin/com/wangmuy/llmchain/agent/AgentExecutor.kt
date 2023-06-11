@@ -5,6 +5,7 @@ import com.wangmuy.llmchain.chain.Chain
 import com.wangmuy.llmchain.schema.AgentAction
 import com.wangmuy.llmchain.schema.AgentFinish
 import com.wangmuy.llmchain.schema.BaseAgentAction
+import com.wangmuy.llmchain.schema.BaseMemory
 import com.wangmuy.llmchain.tool.BaseTool
 import java.util.*
 
@@ -15,8 +16,10 @@ open class AgentExecutor @JvmOverloads constructor(
     var returnIntermediateSteps: Boolean = false,
     var maxIterations: Int? = 15,
     var maxExecutionTime: Long? = null,
-    var earlyStoppingMethod: String = "force"
-): Chain(callbackManager = callbackManager) {
+    var earlyStoppingMethod: String = "force",
+    memory: BaseMemory? = null,
+    verbose: Boolean = false
+): Chain(callbackManager = callbackManager, memory = memory, verbose = verbose) {
     override fun inputKeys(): List<String>? {
         return agent.inputKeys()
     }
@@ -66,9 +69,10 @@ open class AgentExecutor @JvmOverloads constructor(
             val loToolName = agentAction.tool.lowercase(Locale.ROOT)
             val observation = if (loNameToToolMap.containsKey(loToolName)) {
                 val tool = loNameToToolMap[loToolName]!!
-                var toolRunArgs = agent.toolRunLoggingArgs()
+                val toolRunArgs = agent.toolRunLoggingArgs().toMutableMap()
+                toolRunArgs["tool"] = tool
                 if (tool.returnDirect) {
-                    toolRunArgs = toolRunArgs.toMutableMap().also { it["llm_prefix"] = "" }
+                    toolRunArgs["llm_prefix"] = ""
                 }
                 tool.run(agentAction.toolInput, this.verbose, toolRunArgs)
             } else {

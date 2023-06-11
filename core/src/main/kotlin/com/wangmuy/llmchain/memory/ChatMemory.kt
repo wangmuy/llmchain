@@ -40,6 +40,7 @@ abstract class BaseChatMemory @JvmOverloads constructor(
     val returnMessages: Boolean = false
 ): BaseMemory() {
     override fun saveContext(inputs: Map<String, Any>, outputs: Map<String, String>) {
+        // _get_input_output
         val promptInputKey = inputKey ?: Util.getPromptInputKey(inputs, memoryVariables())
         val outputKey = if (this.outputKey == null) {
             if (outputs.size != 1) {
@@ -49,6 +50,7 @@ abstract class BaseChatMemory @JvmOverloads constructor(
         } else {
             this.outputKey
         }
+        // save_context
         chatMemory.addUserMessage(inputs[promptInputKey] as String)
         chatMemory.addAIMessage(outputs[outputKey]!!)
     }

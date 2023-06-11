@@ -1,5 +1,6 @@
 package com.wangmuy.llmchain.chain
 
+import com.wangmuy.llmchain.callback.BaseCallbackManager
 import com.wangmuy.llmchain.memory.ConversationBufferMemory
 import com.wangmuy.llmchain.prompt.BasePromptTemplate
 import com.wangmuy.llmchain.prompt.PromptTemplate
@@ -11,8 +12,11 @@ open class ConversationChain @JvmOverloads constructor(
     llm: BaseLanguageModel,
     prompt: BasePromptTemplate = PROMPT,
     memory: BaseMemory = ConversationBufferMemory(),
-    val inputKey: String = INPUT_KEY
-): LLMChain(prompt, llm, memory = memory, outputKey = OUTPUT_KEY) {
+    val inputKey: String = INPUT_KEY,
+    callbackManager: BaseCallbackManager? = null,
+    verbose: Boolean = false
+): LLMChain(prompt, llm, memory = memory, outputKey = OUTPUT_KEY,
+    callbackManager = callbackManager, verbose = verbose) {
     override fun inputKeys(): List<String>? {
         return Collections.singletonList(inputKey)
     }

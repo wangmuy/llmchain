@@ -2,6 +2,8 @@ package com.wangmuy.llmchain
 
 import com.wangmuy.llmchain.agent.Factory
 import com.wangmuy.llmchain.agent.Tool
+import com.wangmuy.llmchain.callback.CallbackManager
+import com.wangmuy.llmchain.callback.DefaultCallbackHandler
 import com.wangmuy.llmchain.chain.ConversationChain
 import com.wangmuy.llmchain.chain.LLMChain
 import com.wangmuy.llmchain.chain.LLMMathChain
@@ -65,8 +67,17 @@ class QuickstartModel {
     }
 
     @Test fun testMemory() {
-        val llm  = OpenAIChat(APIKEY)
-        val conversation = ConversationChain(llm)
+        val logCallbackHandler = object: DefaultCallbackHandler() {
+            override fun onText(text: String, verbose: Boolean) {
+                println(text)
+            }
+        }
+        val callbackManager = CallbackManager(mutableListOf(logCallbackHandler))
+        val llm  = OpenAIChat(APIKEY).apply {
+            invocationParams[OpenAIChat.REQ_MAX_TOKENS] = 50
+        }
+        llm.callbackManager = callbackManager
+        val conversation = ConversationChain(llm, verbose = true, callbackManager = callbackManager)
         var output: Map<String, Any> = emptyMap()
         var outputStr: String = ""
         output = conversation.invoke(mapOf("input" to "Hi there!"))
