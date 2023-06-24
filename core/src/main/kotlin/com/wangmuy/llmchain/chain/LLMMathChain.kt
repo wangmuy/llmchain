@@ -20,7 +20,7 @@ class LLMMathChain @JvmOverloads constructor(
         return listOf(outputKey)
     }
 
-    private fun procesLLMResult(t: String): Map<String, String> {
+    private fun processLLMResult(t: String): Map<String, String> {
         val answerPrefix = "Answer: "
         if (t.contains(answerPrefix)) {
             val answer = t.split(answerPrefix).last().trim()
@@ -36,7 +36,7 @@ class LLMMathChain @JvmOverloads constructor(
             KEY_QUESTION to inputs!![inputKey]!!
 //            "stop" to listOf("```output") // if use actual math expression evaluation
         ))
-        return procesLLMResult(result)
+        return processLLMResult(result)
     }
 
     companion object {
