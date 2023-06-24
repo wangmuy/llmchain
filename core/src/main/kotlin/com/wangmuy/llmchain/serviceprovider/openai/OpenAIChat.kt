@@ -1,6 +1,5 @@
-package com.wangmuy.llmchain.llm.openai
+package com.wangmuy.llmchain.serviceprovider.openai
 
-import com.theokanning.openai.OpenAiApi
 import com.theokanning.openai.completion.chat.ChatCompletionRequest
 import com.theokanning.openai.completion.chat.ChatMessage
 import com.theokanning.openai.completion.chat.ChatMessageRole
@@ -9,16 +8,13 @@ import com.wangmuy.llmchain.callback.BaseCallbackManager
 import com.wangmuy.llmchain.llm.BaseLLM
 import com.wangmuy.llmchain.schema.Generation
 import com.wangmuy.llmchain.schema.LLMResult
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import java.net.Proxy
-import java.time.Duration
 
 /**
  * retNum: (aka n) How many completions to generate for each prompt.
  */
 class OpenAIChat @JvmOverloads constructor(
-    private val apiKey: String,
+    apiKey: String,
     val invocationParams: MutableMap<String, Any> = mutableMapOf(
         REQ_USER_NAME to "test",
         REQ_MODEL_NAME to "gpt-3.5-turbo",
@@ -27,7 +23,8 @@ class OpenAIChat @JvmOverloads constructor(
     ),
     callbackManager: BaseCallbackManager? = null,
     verbose: Boolean = false,
-    private val proxy: Proxy? = null
+    proxy: Proxy? = null,
+    service: Any? = null
 ): BaseLLM(verbose, callbackManager) {
     companion object {
         const val REQ_MODEL_NAME = "model_name"
@@ -41,36 +38,21 @@ class OpenAIChat @JvmOverloads constructor(
 //        const val REQ_BEST_OF = "best_of"
         const val REQ_LOGIT_BIAS = "logit_bias"
         const val RSP_TOKEN_USAGE = "token_usage"
-
-        private const val TIMEOUT_MILLIS: Long = 10000
     }
 
-    @Volatile
-    private var initDone = false
+    private val openAiService: OpenAiService
 
-    private lateinit var client: OkHttpClient
-    private lateinit var service: OpenAiService
+    init {
+        if (service == null) {
+            ServiceHolder.apiKey = apiKey
+            ServiceHolder.proxy = proxy
+            openAiService = ServiceHolder.openAiService
+        } else {
+            openAiService = service as OpenAiService
+        }
+    }
+
     private val prefixMessages: List<ChatMessage> = mutableListOf()
-
-    private fun initIfNeed() {
-        if (initDone) {
-            return
-        }
-        synchronized(this) {
-            val mapper = OpenAiService.defaultObjectMapper()
-            val builder = OpenAiService.defaultClient(apiKey, Duration.ofMillis(TIMEOUT_MILLIS))
-                .newBuilder()
-                .addInterceptor(HttpLoggingInterceptor())
-            if (proxy != null) {
-                builder.proxy(proxy)
-            }
-            client = builder.build()
-            val retrofit = OpenAiService.defaultRetrofit(client, mapper)
-            val api: OpenAiApi = retrofit.create(OpenAiApi::class.java)
-            service = OpenAiService(api, client.dispatcher().executorService())
-            initDone = true
-        }
-    }
 
     private fun getChatParams(prompts: List<String>, stop: List<String>?): List<ChatMessage> {
         return mutableListOf<ChatMessage>().also {
@@ -81,7 +63,6 @@ class OpenAIChat @JvmOverloads constructor(
 
     override fun onGenerate(prompts: List<String>, stop: List<String>?): LLMResult {
         //println("prompt=\n${prompts[0]}")
-        initIfNeed()
         val messages = getChatParams(prompts, stop)
         val builder = ChatCompletionRequest.builder()
         if (stop != null) {
@@ -119,7 +100,8 @@ class OpenAIChat @JvmOverloads constructor(
             builder.logitBias(biases)
         }
         // TODO retry
-        val response = service.createChatCompletion(builder.build())
+
+        val response = openAiService.createChatCompletion(builder.build())
         //println("rsp=\n${response.choices[0].message.content}")
         return LLMResult(
             listOf(listOf(Generation(response.choices[0].message.content))),

@@ -1,6 +1,6 @@
 package com.wangmuy.llmchain
 
-import com.wangmuy.llmchain.llm.openai.OpenAIChat
+import com.wangmuy.llmchain.serviceprovider.openai.OpenAIChat
 import org.junit.Test
 
 class OpenAIChatTest {

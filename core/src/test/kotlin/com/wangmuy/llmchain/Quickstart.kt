@@ -7,14 +7,12 @@ import com.wangmuy.llmchain.callback.DefaultCallbackHandler
 import com.wangmuy.llmchain.chain.ConversationChain
 import com.wangmuy.llmchain.chain.LLMChain
 import com.wangmuy.llmchain.chain.LLMMathChain
-import com.wangmuy.llmchain.llm.openai.OpenAIChat
 import com.wangmuy.llmchain.memory.BaseChatMemory
 import com.wangmuy.llmchain.prompt.PromptTemplate
+import com.wangmuy.llmchain.serviceprovider.openai.OpenAIChat
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.net.InetSocketAddress
-import java.net.Proxy
 
 // https://python.langchain.com/en/latest/getting_started/getting_started.html
 class QuickstartModel {
