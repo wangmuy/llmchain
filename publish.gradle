@@ -97,26 +97,34 @@ project.pluginManager.withPlugin("org.jetbrains.dokka") {
     packageDoc = dokkaJavadocJar
 }
 
+def SIGN_ARTIFACTS = getPropertyMaybeLocal('SIGN_ARTIFACTS')
+if (SIGN_ARTIFACTS == "true") {
+// local.properties:
+// required: SIGNING_ARMOR_KEYFILE, SIGNING_PASSWORD
+// optional: SIGNING_KEYID
+    def SIGNING_ARMOR_KEYFILE = getPropertyMaybeLocal('SIGNING_ARMOR_KEYFILE')
+    def SIGNING_KEY = file(SIGNING_ARMOR_KEYFILE).text
+    def SIGNING_PASSWORD = getPropertyMaybeLocal('SIGNING_PASSWORD')
+    def SIGNING_KEYID = getPropertyMaybeLocal('SIGNING_KEYID')
+    apply plugin: 'signing'
+    signing {
+        if (nullOrEmpty(SIGNING_KEYID)) {
+            useInMemoryPgpKeys(SIGNING_KEY, SIGNING_PASSWORD)
+        } else {
+            useInMemoryPgpKeys(SIGNING_KEYID, SIGNING_KEY, SIGNING_PASSWORD)
+        }
+        sign(publishing.publications)
+    }
+}
+
 // load/set props into (e.g: gradle.properties)
 //  required:
-//   PUBLISH_TYPE=aar/java
-//   POM_GROUP_ID
-//   POM_ARTIFACT_ID
-//   version
+//   PUBLISH_TYPE=aar/java, POM_GROUP_ID, POM_ARTIFACT_ID, version
 //  optional:
-//   POM_LICENCE_NAME
-//   POM_LICENCE_URL
-//   POM_LICENCE_DIST
-//   POM_DEVELOPER_ID
-//   POM_DEVELOPER_NAME
+//   POM_LICENCE_NAME, POM_LICENCE_URL, POM_LICENCE_DIST, POM_DEVELOPER_ID, POM_DEVELOPER_NAME, POM_SCM_URL, POM_SCM_COMMIT
 //   POM_DEPENDENCY_EXCLUDES=comma separated list
-//   POM_SCM_URL
-//   POM_SCM_COMMIT
 // local.properties:
-//   PUBLISH_URL_RELEASE
-//   PUBLISH_URL_SNAPSHOT
-//   MAVEN_USERNAME
-//   MAVEN_PASSWORD
+//   PUBLISH_URL_RELEASE, PUBLISH_URL_SNAPSHOT, MAVEN_USERNAME, MAVEN_PASSWORD
 afterEvaluate {
     publishing {
         publications {
@@ -148,7 +156,7 @@ afterEvaluate {
 
                 if (PUBLISH_TYPE == "java") {
                     from components.java
-//                    artifact packageSources
+                    artifact packageSources
                     artifact packageDoc
                 } else if (PUBLISH_TYPE == "aar") {
                     def agpVersion = {
