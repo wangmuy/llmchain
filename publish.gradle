@@ -126,27 +126,6 @@ afterEvaluate {
                 artifactId POM_ARTIFACT_ID
                 version versionName
 
-                def agpVersion = {
-                    def verClz = null
-                    try {
-                        verClz = Class.forName("com.android.builder.model.Version.Version")
-                    } catch (Throwable ignored) {}
-                    if (verClz == null) {
-                        try {
-                            verClz = Class.forName("com.android.Version")
-                        } catch (Throwable ignored) {}
-                    }
-                    try {
-                        def field = verClz.getDeclaredField("ANDROID_GRADLE_PLUGIN_VERSION")
-                        field.accessible = true
-                        String curVer = field.get(null)
-                        return curVer
-                    } catch (Throwable ignored) {
-//                        throw ignored
-                        return "7.0.0" //TODO
-                    }
-                }()
-
                 publishing.repositories.maven {
                     def pubUrl = getPropertyMaybeLocal(isReleaseBuild(versionName)? 'PUBLISH_URL_RELEASE' : 'PUBLISH_URL_SNAPSHOT')
                     def username = getPropertyMaybeLocal("MAVEN_USERNAME")
@@ -172,6 +151,27 @@ afterEvaluate {
 //                    artifact packageSources
                     artifact packageDoc
                 } else if (PUBLISH_TYPE == "aar") {
+                    def agpVersion = {
+                        def verClz = null
+                        try {
+                            verClz = Class.forName("com.android.builder.model.Version.Version")
+                        } catch (Throwable ignored) {}
+                        if (verClz == null) {
+                            try {
+                                verClz = Class.forName("com.android.Version")
+                            } catch (Throwable ignored) {}
+                        }
+                        try {
+                            def field = verClz.getDeclaredField("ANDROID_GRADLE_PLUGIN_VERSION")
+                            field.accessible = true
+                            String curVer = field.get(null)
+                            return curVer
+                        } catch (Throwable ignored) {
+//                        throw ignored
+                            return "7.0.0" //TODO
+                        }
+                    }()
+
                     // if AGP >= 3.6.0, use
                     if (agpVersion >= "3.6.0") {
                         from components.release
@@ -219,14 +219,33 @@ afterEvaluate {
                     }
                 }
 
-                def pomConfig = {
+                def pomConfig = pom {
+                    def POM_NAME = getPropertyMaybeLocal('POM_NAME')
+                    if (!nullOrEmpty(POM_NAME)) {
+                        name = POM_NAME
+                    }
+
+                    def POM_DESCRIPTION = getPropertyMaybeLocal('POM_DESCRIPTION')
+                    if (!nullOrEmpty(POM_DESCRIPTION)) {
+                        description = POM_DESCRIPTION
+                    }
+
+                    def POM_URL = getPropertyMaybeLocal('POM_URL')
+                    if (!nullOrEmpty(POM_URL)) {
+                        url = POM_URL
+                    }
+
                     def POM_SCM_URL = getPropertyMaybeLocal('POM_SCM_URL')
-                    def POM_SCM_COMMIT = getPropertyMaybeLocal('POM_SCM_COMMIT')
                     if (!nullOrEmpty(POM_SCM_URL)) {
                         scm {
-                            url POM_SCM_URL
+                            url = POM_SCM_URL
+                            def POM_SCM_CONNECTION = getPropertyMaybeLocal('POM_SCM_CONNECTION')
+                            if (!nullOrEmpty(POM_SCM_CONNECTION)) {
+                                connection = POM_SCM_CONNECTION
+                            }
+                            def POM_SCM_COMMIT = getPropertyMaybeLocal('POM_SCM_COMMIT')
                             if (!nullOrEmpty(POM_SCM_COMMIT)) {
-                                tag POM_SCM_COMMIT
+                                tag = POM_SCM_COMMIT
                             }
                         }
                     }
@@ -234,23 +253,31 @@ afterEvaluate {
                     def POM_LICENCE_NAME = getPropertyMaybeLocal('POM_LICENCE_NAME')
                     def POM_LICENCE_URL = getPropertyMaybeLocal('POM_LICENCE_URL')
                     def POM_LICENCE_DIST = getPropertyMaybeLocal('POM_LICENCE_DIST')
-                    if (!nullOrEmpty(POM_LICENCE_NAME) && !nullOrEmpty(POM_LICENCE_URL) && !nullOrEmpty(POM_LICENCE_DIST)) {
+                    if (!nullOrEmpty(POM_LICENCE_NAME)) {
                         licenses {
                             license {
-                                name POM_LICENCE_NAME
-                                url POM_LICENCE_URL
-                                distribution POM_LICENCE_DIST
+                                name = POM_LICENCE_NAME
+                                if (!nullOrEmpty(POM_LICENCE_URL)) {
+                                    url = POM_LICENCE_URL
+                                }
+                                if (!nullOrEmpty(POM_LICENCE_DIST)) {
+                                    distribution = POM_LICENCE_DIST
+                                }
                             }
                         }
                     }
 
                     def POM_DEVELOPER_ID = getPropertyMaybeLocal('POM_DEVELOPER_ID')
                     def POM_DEVELOPER_NAME = getPropertyMaybeLocal('POM_DEVELOPER_NAME')
-                    if (!nullOrEmpty(POM_DEVELOPER_ID) && !nullOrEmpty(POM_DEVELOPER_NAME)) {
+                    if (!nullOrEmpty(POM_DEVELOPER_ID) || !nullOrEmpty(POM_DEVELOPER_NAME)) {
                         developers {
                             developer {
-                                id POM_DEVELOPER_ID
-                                name POM_DEVELOPER_NAME
+                                if (!nullOrEmpty(POM_DEVELOPER_ID)) {
+                                    id = POM_DEVELOPER_ID
+                                }
+                                if (!nullOrEmpty(POM_DEVELOPER_NAME)) {
+                                    name = POM_DEVELOPER_NAME
+                                }
                             }
                         }
                     }
