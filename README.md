@@ -3,6 +3,24 @@ This is an experimental port of [langchain( currently v0.0.139 )](https://github
 Please note that this project is currently in the proof-of-concept stage,
 and its API is subject to change.
 
+## Maven repository
+Only the SNAPSHOT version is published.
+
+Add to repositories
+```gradle
+repositories {
+    mavenCentral()
+    maven { url "https://s01.oss.sonatype.org/content/repositories/snapshots/" }
+}
+```
+
+Add to dependencies
+```gradle
+dependencies {
+    implementation("io.github.wangmuy.llmchain:core:0.0.1-SNAPSHOT") { changing=true }
+}
+```
+
 ## Quickstart
 Here's the almost one-to-one translation of  [langchain Quickstart Guide](https://python.langchain.com/docs/get_started/quickstart)
  in [Quickstart.kt](https://github.com/wangmuy/llmchain/blob/main/core/src/test/kotlin/com/wangmuy/llmchain/Quickstart.kt), including all the modules/components.
