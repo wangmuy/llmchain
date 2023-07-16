@@ -9,6 +9,20 @@ abstract class BaseLLM @JvmOverloads constructor(
     val verbose: Boolean = false,
     callbackManager: BaseCallbackManager? = null
 ): BaseLanguageModel(callbackManager), (String, List<String>?) -> String {
+    companion object {
+        const val REQ_MODEL_NAME = "model_name"
+        const val REQ_USER_NAME = "user_name"
+        const val REQ_TEMPERATURE = "temperature"
+        const val REQ_MAX_TOKENS = "max_tokens"
+        const val REQ_TOP_P = "top_p"
+        const val REQ_FREQUENCY_PENALTY = "frequency_penalty"
+        const val REQ_PRESENCE_PENALTY = "presence_penalty"
+        const val REQ_N = "n"
+        //        const val REQ_BEST_OF = "best_of"
+        const val REQ_LOGIT_BIAS = "logit_bias"
+        const val RSP_TOKEN_USAGE = "token_usage"
+    }
+
     private var cache: Boolean = false
 
     override fun generatePrompt(prompts: List<PromptValue>, stop: List<String>?): LLMResult {

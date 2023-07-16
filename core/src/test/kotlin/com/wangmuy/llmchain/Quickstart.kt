@@ -7,12 +7,15 @@ import com.wangmuy.llmchain.callback.DefaultCallbackHandler
 import com.wangmuy.llmchain.chain.ConversationChain
 import com.wangmuy.llmchain.chain.LLMChain
 import com.wangmuy.llmchain.chain.LLMMathChain
+import com.wangmuy.llmchain.llm.BaseLLM
 import com.wangmuy.llmchain.memory.BaseChatMemory
 import com.wangmuy.llmchain.prompt.PromptTemplate
 import com.wangmuy.llmchain.serviceprovider.openai.OpenAIChat
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.net.InetSocketAddress
+import java.net.Proxy
 
 // https://python.langchain.com/en/latest/getting_started/getting_started.html
 class QuickstartModel {
@@ -23,7 +26,7 @@ class QuickstartModel {
 
     @Test fun testLLMs() {
         val llm = OpenAIChat(APIKEY, proxy = PROXY)
-        llm.invocationParams[OpenAIChat.REQ_TEMPERATURE] = 0.9
+        llm.invocationParams[BaseLLM.REQ_TEMPERATURE] = 0.9
         val text = "What would be a good company name for a company that makes colorful socks?"
         val output = llm.invoke(text, null)
         println("output=\n$output")
@@ -39,7 +42,7 @@ class QuickstartModel {
 
     @Test fun testChains() {
         val llm = OpenAIChat(APIKEY)
-        llm.invocationParams[OpenAIChat.REQ_TEMPERATURE] = 0.9
+        llm.invocationParams[BaseLLM.REQ_TEMPERATURE] = 0.9
         val prompt = PromptTemplate(
             inputVariables = listOf("product"),
             template = "What is a good name for a company that makes {product}?")
@@ -50,7 +53,7 @@ class QuickstartModel {
 
     @Test fun testAgents() {
         val llm = OpenAIChat(APIKEY)
-        llm.invocationParams[OpenAIChat.REQ_TEMPERATURE] = 0.0
+        llm.invocationParams[BaseLLM.REQ_TEMPERATURE] = 0.0
         val fakeSerpApiTool = Tool(
             name = "Search",
             description = "A search engine. Useful for when you need to answer questions about current events. Input should be a search query.",
@@ -72,7 +75,7 @@ class QuickstartModel {
         }
         val callbackManager = CallbackManager(mutableListOf(logCallbackHandler))
         val llm  = OpenAIChat(APIKEY).apply {
-            invocationParams[OpenAIChat.REQ_MAX_TOKENS] = 50
+            invocationParams[BaseLLM.REQ_MAX_TOKENS] = 50
         }
         llm.callbackManager = callbackManager
         val conversation = ConversationChain(llm, verbose = true, callbackManager = callbackManager)

@@ -15,29 +15,25 @@ import java.net.Proxy
  */
 class OpenAIChat @JvmOverloads constructor(
     apiKey: String,
-    val invocationParams: MutableMap<String, Any> = mutableMapOf(
-        REQ_USER_NAME to "test",
-        REQ_MODEL_NAME to "gpt-3.5-turbo",
-        REQ_MAX_TOKENS to 50,
-        REQ_N to 1
-    ),
+    val invocationParams: MutableMap<String, Any> = DEFAULT_PARAMS,
     callbackManager: BaseCallbackManager? = null,
     verbose: Boolean = false,
     proxy: Proxy? = null,
     service: Any? = null
 ): BaseLLM(verbose, callbackManager) {
     companion object {
-        const val REQ_MODEL_NAME = "model_name"
-        const val REQ_USER_NAME = "user_name"
-        const val REQ_TEMPERATURE = "temperature"
-        const val REQ_MAX_TOKENS = "max_tokens"
-        const val REQ_TOP_P = "top_p"
-        const val REQ_FREQUENCY_PENALTY = "frequency_penalty"
-        const val REQ_PRESENCE_PENALTY = "presence_penalty"
-        const val REQ_N = "n"
-//        const val REQ_BEST_OF = "best_of"
-        const val REQ_LOGIT_BIAS = "logit_bias"
-        const val RSP_TOKEN_USAGE = "token_usage"
+        private val DEFAULT_PARAMS = mutableMapOf<String, Any>(
+            REQ_USER_NAME to "test",
+            REQ_MODEL_NAME to "gpt-3.5-turbo",
+            REQ_MAX_TOKENS to 50,
+            REQ_N to 1
+        )
+    }
+
+    init {
+        DEFAULT_PARAMS.filterNot { it.key in invocationParams }.forEach {
+            invocationParams[it.key] = it.value
+        }
     }
 
     private val openAiService: OpenAiService

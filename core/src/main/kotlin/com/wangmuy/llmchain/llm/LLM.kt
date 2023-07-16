@@ -1,12 +1,12 @@
 package com.wangmuy.llmchain.llm
 
-import com.wangmuy.llmchain.callback.CallbackManager
+import com.wangmuy.llmchain.callback.BaseCallbackManager
 import com.wangmuy.llmchain.schema.Generation
 import com.wangmuy.llmchain.schema.LLMResult
 
 abstract class LLM(
     verbose: Boolean = false,
-    callbackManager: CallbackManager? = null
+    callbackManager: BaseCallbackManager? = null
 ): BaseLLM(verbose, callbackManager) {
     protected abstract fun onInvoke(prompt: String, stop: List<String>?): String // _call
 
