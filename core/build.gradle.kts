@@ -1,8 +1,8 @@
 plugins {
-    kotlin("jvm")
+    alias(libs.plugins.kotlin.jvm)
     `java-library`
     id("maven-publish")
-    id("org.jetbrains.dokka")
+    alias(libs.plugins.dokka)
 }
 
 repositories {
@@ -11,17 +11,18 @@ repositories {
 }
 
 dependencies {
-    implementation("com.theokanning.openai-gpt3-java:api:0.12.0")
-    implementation("com.theokanning.openai-gpt3-java:client:0.12.0")
-    implementation("com.theokanning.openai-gpt3-java:service:0.12.0")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.14.2")
-    implementation("com.squareup.okhttp3:okhttp:3.14.9")
-    implementation("com.squareup.okhttp3:logging-interceptor:3.14.9")
+    implementation(libs.theokanningOpenai.api)
+    implementation(libs.theokanningOpenai.client)
+    implementation(libs.theokanningOpenai.service)
+    implementation(libs.jacksonDatabind)
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.loggingInterceptor)
+    implementation(libs.retrofitJackson)
 
     testImplementation(kotlin("test"))
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
     // https://junit.org/junit5/docs/current/user-guide/
-    testImplementation("junit:junit:4.13.2")
+    testImplementation(libs.junit)
     testRuntimeOnly("org.junit.vintage:junit-vintage-engine")
 }
 

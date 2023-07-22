@@ -1,8 +1,8 @@
 plugins {
-    kotlin("jvm")
+    alias(libs.plugins.kotlin.jvm)
     `java-library`
     id("maven-publish")
-    id("org.jetbrains.dokka")
+    alias(libs.plugins.dokka)
 }
 
 repositories {
@@ -12,13 +12,13 @@ repositories {
 
 dependencies {
     implementation(project(":core"))
-    implementation("com.hexadevlabs:gpt4all-java-binding:1.1.3")
-    implementation("org.slf4j:slf4j-simple:1.7.36")
+    implementation(libs.gpt4all)
+    implementation(libs.slf4j.simple)
 
     testImplementation(kotlin("test"))
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
     // https://junit.org/junit5/docs/current/user-guide/
-    testImplementation("junit:junit:4.13.2")
+    testImplementation(libs.junit)
     testRuntimeOnly("org.junit.vintage:junit-vintage-engine")
 }
 
