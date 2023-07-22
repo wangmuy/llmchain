@@ -18,10 +18,12 @@ class OpenAIChat @JvmOverloads constructor(
     val invocationParams: MutableMap<String, Any> = DEFAULT_PARAMS,
     callbackManager: BaseCallbackManager? = null,
     verbose: Boolean = false,
+    baseUrl: String = OPENAI_BASE_URL,
+    timeoutMillis: Long = ServiceInfo.TIMEOUT_MILLIS,
     proxy: Proxy? = null,
-    service: Any? = null
 ): BaseLLM(verbose, callbackManager) {
     companion object {
+        const val OPENAI_BASE_URL = "https://api.openai.com/"
         private val DEFAULT_PARAMS = mutableMapOf<String, Any>(
             REQ_USER_NAME to "test",
             REQ_MODEL_NAME to "gpt-3.5-turbo",
@@ -39,13 +41,11 @@ class OpenAIChat @JvmOverloads constructor(
     private val openAiService: OpenAiService
 
     init {
-        if (service == null) {
-            ServiceHolder.apiKey = apiKey
-            ServiceHolder.proxy = proxy
-            openAiService = ServiceHolder.openAiService
-        } else {
-            openAiService = service as OpenAiService
-        }
+        ServiceHolder.serviceInfo.baseUrl = baseUrl
+        ServiceHolder.serviceInfo.apiKey = apiKey
+        ServiceHolder.serviceInfo.timeoutMillis = timeoutMillis
+        ServiceHolder.serviceInfo.proxy = proxy
+        openAiService = ServiceHolder.serviceInfo.service
     }
 
     private val prefixMessages: List<ChatMessage> = mutableListOf()
