@@ -42,8 +42,9 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                api(libs.coroutines.core)
-                api(libs.kotlinx.datetime)
+                implementation(project(":core"))
+                implementation(libs.coroutines.core)
+                implementation(libs.aallam.openai)
             }
         }
         val commonTest by getting {
@@ -51,13 +52,21 @@ kotlin {
                 implementation(kotlin("test"))
             }
         }
-        val jvmMain by getting
+        val jvmMain by getting {
+            dependencies {
+                implementation(libs.ktor.client.okhttp)
+            }
+        }
         val jvmTest by getting
         val jsMain by getting
         val jsTest by getting
-        val nativeMain by getting
+        val nativeMain by getting {
+            dependencies {
+                implementation(libs.ktor.client.curl)
+            }
+        }
         val nativeTest by getting
     }
 }
 
-apply(from = "../publish.gradle")
+apply(from = "../../publish.gradle")

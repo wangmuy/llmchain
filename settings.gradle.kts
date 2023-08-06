@@ -1,6 +1,6 @@
 rootProject.name = "llmchain"
 include(":core")
-include(":serviceprovider:gpt4all")
+include(":serviceprovider:openai")
 
 pluginManagement {
     repositories {
