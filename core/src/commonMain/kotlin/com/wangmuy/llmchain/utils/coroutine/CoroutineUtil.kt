@@ -1,3 +1,3 @@
 package com.wangmuy.llmchain.utils.coroutine
 
-expect fun runBlockingKMP(block: suspend () -> Unit)
+expect fun <T> runBlockingKMP(block: suspend () -> T): T
