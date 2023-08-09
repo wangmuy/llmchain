@@ -1,3 +1,4 @@
+import org.apache.tools.ant.taskdefs.condition.Os
 plugins {
     kotlin("multiplatform")
     id("maven-publish")
@@ -62,7 +63,11 @@ kotlin {
         val jsTest by getting
         val nativeMain by getting {
             dependencies {
-                implementation(libs.ktor.client.curl)
+                if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                    implementation(libs.ktor.client.winhttp)
+                } else {
+                    implementation(libs.ktor.client.cio)
+                }
             }
         }
         val nativeTest by getting

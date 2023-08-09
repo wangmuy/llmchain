@@ -11,6 +11,8 @@ kotlinx-datetime = "org.jetbrains.kotlinx:kotlinx-datetime:0.4.0"
 aallam-openai = "com.aallam.openai:openai-client:3.3.0"
 ktor-client-okhttp = { group = "io.ktor", name = "ktor-client-okhttp", version.ref = "ktor" }
 ktor-client-curl = { group = "io.ktor", name = "ktor-client-curl", version.ref = "ktor" }
+ktor-client-winhttp = { group = "io.ktor", name = "ktor-client-winhttp", version.ref = "ktor" }
+ktor-client-cio = "io.ktor:ktor-client-cio:2.3.2" #{ group = "io.ktor", name = "ktor-client-cio", version.ref = "ktor" }
 
 [plugins]
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
