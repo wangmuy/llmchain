@@ -26,6 +26,11 @@ kotlin {
                     enabled.set(true)
                 }
             }
+            testTask {
+                useMocha()
+            }
+        }
+        nodejs {
         }
         dependencies {
         }

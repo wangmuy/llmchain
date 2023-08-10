@@ -27,7 +27,13 @@ kotlin {
                     enabled.set(true)
                 }
             }
+            testTask {
+                useMocha()
+            }
         }
+        nodejs {
+        }
+        binaries.executable()
         dependencies {
         }
     }
