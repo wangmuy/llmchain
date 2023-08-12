@@ -26,16 +26,18 @@ Be sure to checkout the support matrix.
 
 ### Multiplatform support matrix
 
-| package                | platform | isCompiled  | isTested |
-|------------------------|----------|-------------|----------|
-| core                   | jvm      | true        | true     |
-| core                   | native   | true        | true     |
-| core                   | js       | true        | true     |
-| core                   | wasm     | true        | false    |
-| serviceprovider-openai | jvm      | true        | true     |
-| serviceprovider-openai | native   | true        | true     |
-| serviceprovider-openai | js       | true        | false    |
-| serviceprovider-openai | wasm     | false       | false    |
+| package                | platform | isCompiled | isTested |
+|------------------------|----------|------------|----------|
+| core                   | jvm      | true       | true     |
+| core                   | ios      | false      | false    |
+| core                   | native   | true       | true     |
+| core                   | js       | true       | true     |
+| core                   | wasm     | true       | false    |
+| serviceprovider-openai | jvm      | true       | true     |
+| serviceprovider-openai | ios      | false      | false    |
+| serviceprovider-openai | native   | true       | true     |
+| serviceprovider-openai | js       | true       | false    |
+| serviceprovider-openai | wasm     | false      | false    |
 
 ## Quickstart
 Here's the almost one-to-one translation of  [langchain Quickstart Guide](https://python.langchain.com/docs/get_started/quickstart)
