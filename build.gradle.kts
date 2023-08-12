@@ -7,11 +7,6 @@ plugins {
     alias(libs.plugins.dokka) apply false
 }
 
-repositories {
-    mavenCentral()
-    google()
-}
-
 rootProject.plugins.withType(YarnPlugin::class.java) {
     rootProject.the<YarnRootExtension>().yarnLockMismatchReport = YarnLockMismatchReport.WARNING
 }

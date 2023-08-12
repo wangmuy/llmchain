@@ -7,7 +7,7 @@ import com.wangmuy.llmchain.schema.AgentFinish
 import com.wangmuy.llmchain.schema.BaseAgentAction
 import com.wangmuy.llmchain.schema.BaseMemory
 import com.wangmuy.llmchain.tool.BaseTool
-import kotlinx.datetime.Clock
+import com.wangmuy.llmchain.utils.time.currentTimeMillis
 import kotlin.jvm.JvmOverloads
 
 open class AgentExecutor @JvmOverloads constructor(
@@ -90,7 +90,7 @@ open class AgentExecutor @JvmOverloads constructor(
         val intermediateSteps = mutableListOf<IntermediateStep>()
         var iterations = 0
         var timeElapsed = 0L
-        val startTime = Clock.System.now().toEpochMilliseconds()
+        val startTime = currentTimeMillis()
         while (shouldContinue(iterations, timeElapsed)) {
             val nextStepOutput = takeNextStep(nameToToolMap, inputs, intermediateSteps)
             if (nextStepOutput.size == 1 && nextStepOutput[0] is AgentFinish) {
@@ -106,7 +106,7 @@ open class AgentExecutor @JvmOverloads constructor(
                 }
             }
             iterations += 1
-            timeElapsed = Clock.System.now().toEpochMilliseconds() - startTime
+            timeElapsed = currentTimeMillis() - startTime
         }
         val output = agent.returnStoppedResponse(earlyStoppingMethod, intermediateSteps, inputs)
         return onReturn(output, intermediateSteps)

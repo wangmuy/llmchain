@@ -4,11 +4,6 @@ plugins {
     alias(libs.plugins.dokka)
 }
 
-repositories {
-    mavenCentral()
-    google()
-}
-
 kotlin {
     jvm {
         compilations.all {
@@ -35,6 +30,23 @@ kotlin {
         dependencies {
         }
     }
+    wasm {
+        browser {
+            commonWebpackConfig {
+                cssSupport {
+                    enabled.set(true)
+                }
+            }
+            testTask {
+                useMocha()
+            }
+        }
+        nodejs {
+        }
+        dependencies {
+        }
+    }
+
     val hostOs = System.getProperty("os.name")
     val isMingwX64 = hostOs.startsWith("Windows")
     val nativeTarget = when {
@@ -47,8 +59,6 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                api(libs.coroutines.core)
-                api(libs.kotlinx.datetime)
             }
         }
         val commonTest by getting {
@@ -56,11 +66,38 @@ kotlin {
                 implementation(kotlin("test"))
             }
         }
-        val jvmMain by getting
+
+        val jvmMain by getting {
+            dependencies {
+                api(libs.coroutines.core)
+                api(libs.kotlinx.datetime)
+            }
+        }
         val jvmTest by getting
-        val jsMain by getting
+
+        val jsMain by getting {
+            dependencies {
+                api(libs.coroutines.core)
+                api(libs.kotlinx.datetime)
+            }
+        }
         val jsTest by getting
-        val nativeMain by getting
+
+        val wasmMain by getting {
+            dependencies {
+                api(libs.coroutines.wasm)
+                api(libs.kotlinx.datetime.wasm)
+                api(libs.kotlinx.atomicfu.wasm)
+            }
+        }
+        val wasmTest by getting
+
+        val nativeMain by getting {
+            dependencies {
+                api(libs.coroutines.core)
+                api(libs.kotlinx.datetime)
+            }
+        }
         val nativeTest by getting
     }
 }

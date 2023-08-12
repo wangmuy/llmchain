@@ -8,6 +8,9 @@ junit = "junit:junit:4.13.2"
 coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
 coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
 kotlinx-datetime = "org.jetbrains.kotlinx:kotlinx-datetime:0.4.0"
+coroutines-wasm = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.0-RC-wasm0"
+kotlinx-datetime-wasm = "org.jetbrains.kotlinx:kotlinx-datetime:0.4.0-wasm0"
+kotlinx-atomicfu-wasm = "org.jetbrains.kotlinx:atomicfu:0.20.2-wasm0"
 aallam-openai = "com.aallam.openai:openai-client:3.3.0"
 ktor-client-okhttp = { group = "io.ktor", name = "ktor-client-okhttp", version.ref = "ktor" }
 ktor-client-curl = { group = "io.ktor", name = "ktor-client-curl", version.ref = "ktor" }
