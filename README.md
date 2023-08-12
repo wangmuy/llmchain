@@ -1,7 +1,6 @@
 # LLMChain
-This is an experimental port of [langchain( currently v0.0.139 )](https://github.com/hwchase17/langchain/tree/v0.0.139) to the Kotlin/JVM ecosystem.
-Please note that this project is currently in the proof-of-concept stage,
-and its API is subject to change.
+This is an experimental port of [langchain( currently v0.0.139 )](https://github.com/hwchase17/langchain/tree/v0.0.139) to android/JVM/Kotlin Multiplatform.
+Please note that this project is currently in the proof-of-concept stage, and is subject to change.
 
 ## Maven repository
 Only the SNAPSHOT version is published.
@@ -15,11 +14,28 @@ repositories {
 ```
 
 Add to dependencies
+* Android/JVM developers are advised to use the android branch README dependency directions.
+* For Kotlin Multiplatform developers, try to add the following
 ```gradle
 dependencies {
-    implementation("io.github.wangmuy.llmchain:core:0.0.1-SNAPSHOT") { changing=true }
+    implementation("io.github.wangmuy.llmchain.kmp:core:0.0.1-SNAPSHOT") { changing=true }
+    implementation("io.github.wangmuy.llmchain.kmp:serviceprovider-openai:0.0.1-SNAPSHOT") { changing=true }
 }
 ```
+Be sure to checkout the support matrix.
+
+### Multiplatform support matrix
+
+| package                | platform | isCompiled  | isTested |
+|------------------------|----------|-------------|----------|
+| core                   | jvm      | true        | true     |
+| core                   | native   | true        | true     |
+| core                   | js       | true        | true     |
+| core                   | wasm     | true        | false    |
+| serviceprovider-openai | jvm      | true        | true     |
+| serviceprovider-openai | native   | true        | true     |
+| serviceprovider-openai | js       | true        | false    |
+| serviceprovider-openai | wasm     | false       | false    |
 
 ## Quickstart
 Here's the almost one-to-one translation of  [langchain Quickstart Guide](https://python.langchain.com/docs/get_started/quickstart)
@@ -129,15 +145,12 @@ output = conversation.invoke(mapOf("input" to "I'm doing well! Just having a con
   - [x] VectorStoreRetriever
 - Embedding
   - [x] Embeddings
-- OpenAI
-  - [x] OpenAIChat
-  - [x] OpenAIEmbedding
 
 
 - LLM service provider
-  - [x] OpenAI
-  - [x] [FastChat OpenAI-compatible restful apis](https://github.com/lm-sys/FastChat/blob/main/docs/openai_api.md)
-  - [ ] GPT4All: java bindings for desktops
+  - [x] OpenAI 
+    - [x] OpenAIChat
+    - [x] OpenAIEmbedding
 
 ## License
 ```text
