@@ -1,0 +1,49 @@
+//apply plugin: 'maven-publish'
+//apply plugin: 'com.vanniktech.maven.publish'
+
+private def readPropertyFromLocalProperties(String key) {
+    Properties properties = new Properties()
+    try {
+        properties.load(project.rootProject.file('local.properties').newDataInputStream())
+    } catch (Exception e) {
+        println("load local properties failed msg:${e.message}")
+    }
+    return properties.getProperty(key)
+}
+
+private def isReleaseBuild(ver) {
+    return !ver.toString().contains("SNAPSHOT")
+}
+
+private def getPropertyMaybeLocal(String propName) {
+    return hasProperty(propName)? project.property(propName) : readPropertyFromLocalProperties(propName)
+}
+
+private static def nullOrEmpty(String str) {
+    return str == null || "" == str.trim()
+}
+
+publishing {
+    repositories {
+        maven {
+            def versionName = getPropertyMaybeLocal("VERSION_NAME")
+            def pubUrl = getPropertyMaybeLocal(isReleaseBuild(versionName)? 'PUBLISH_URL_RELEASE' : 'PUBLISH_URL_SNAPSHOT')
+            def username = getPropertyMaybeLocal("MAVEN_USERNAME")
+            def password = getPropertyMaybeLocal("MAVEN_PASSWORD")
+            if (nullOrEmpty(pubUrl)) {
+                println "ERROR!! need PUBLISH_URL_RELEASE or PUBLISH_URL_SNAPSHOT in gradle or local.properties"
+            }
+            if (pubUrl.startsWith("http") && (nullOrEmpty(username) || nullOrEmpty(password))) {
+                println "ERROR!! need MAVEN_USERNAME and MAVEN_PASSWORD for ${pubUrl}"
+            }
+            url pubUrl
+            if (pubUrl.startsWith("http")) {
+                allowInsecureProtocol true
+                authentication {
+                    credentials.username = username
+                    credentials.password = password
+                }
+            }
+        }
+    }
+}

@@ -1,7 +1,7 @@
 plugins {
     kotlin("multiplatform")
-    id("maven-publish")
     alias(libs.plugins.dokka)
+    id("com.vanniktech.maven.publish")
 }
 
 kotlin {
@@ -102,4 +102,4 @@ kotlin {
     }
 }
 
-apply(from = "../publish.gradle")
+apply(from = "../publishUrl.gradle")

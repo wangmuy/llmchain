@@ -19,4 +19,5 @@ ktor-client-cio = "io.ktor:ktor-client-cio:2.3.2" #{ group = "io.ktor", name = "
 
 [plugins]
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+maven-publish = { id = "com.vanniktech.maven.publish", version = "0.25.3" }
 dokka = "org.jetbrains.dokka:1.8.20"

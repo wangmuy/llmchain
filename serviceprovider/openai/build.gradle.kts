@@ -1,13 +1,8 @@
 import org.apache.tools.ant.taskdefs.condition.Os
 plugins {
     kotlin("multiplatform")
-    id("maven-publish")
     alias(libs.plugins.dokka)
-}
-
-repositories {
-    mavenCentral()
-    google()
+    id("com.vanniktech.maven.publish")
 }
 
 kotlin {
@@ -80,4 +75,4 @@ kotlin {
     }
 }
 
-apply(from = "../../publish.gradle")
+apply(from = "../../publishUrl.gradle")
