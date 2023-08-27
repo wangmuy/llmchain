@@ -140,16 +140,17 @@ afterEvaluate {
                     def password = getPropertyMaybeLocal("MAVEN_PASSWORD")
                     if (nullOrEmpty(pubUrl)) {
                         println "ERROR!! need PUBLISH_URL_RELEASE or PUBLISH_URL_SNAPSHOT in gradle or local.properties"
-                    }
-                    if (pubUrl.startsWith("http") && (nullOrEmpty(username) || nullOrEmpty(password))) {
-                        println "ERROR!! need MAVEN_USERNAME and MAVEN_PASSWORD for ${pubUrl}"
-                    }
-                    url pubUrl
-                    if (pubUrl.startsWith("http")) {
-                        allowInsecureProtocol true
-                        authentication {
-                            credentials.username = username
-                            credentials.password = password
+                    } else {
+                        if (pubUrl.startsWith("http") && (nullOrEmpty(username) || nullOrEmpty(password))) {
+                            println "ERROR!! need MAVEN_USERNAME and MAVEN_PASSWORD for ${pubUrl}"
+                        }
+                        url pubUrl
+                        if (pubUrl.startsWith("http")) {
+                            allowInsecureProtocol true
+                            authentication {
+                                credentials.username = username
+                                credentials.password = password
+                            }
                         }
                     }
                 }
