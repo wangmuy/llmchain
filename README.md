@@ -6,7 +6,7 @@ and its API is subject to change.
 ## Maven repository
 Only the SNAPSHOT version is published.
 
-Add to repositories
+### Add to repositories
 ```gradle
 repositories {
     mavenCentral()
@@ -14,10 +14,19 @@ repositories {
 }
 ```
 
-Add to dependencies
+### Add to dependencies
+build.gradle
 ```gradle
 dependencies {
     implementation("io.github.wangmuy.llmchain:core:0.0.1-SNAPSHOT") { changing=true }
+}
+```
+
+build.gradle.kts
+```kotlin
+implementation("io.github.wangmuy.llmchain:core:0.0.1-SNAPSHOT")
+configurations.all {
+  resolutionStrategy.cacheChangingModulesFor(0, "seconds")
 }
 ```
 
