@@ -5,7 +5,7 @@ import java.util.*
 abstract class BaseCallbackManager: BaseCallbackHandler {
     abstract fun addHandler(callback: BaseCallbackHandler)
     abstract fun removeHandler(handler: BaseCallbackHandler)
-    fun setHandler(handler: BaseCallbackHandler) {
+    open fun setHandler(handler: BaseCallbackHandler) {
         setHandlers(Collections.singletonList(handler))
     }
     abstract fun setHandlers(handlers: List<BaseCallbackHandler>)

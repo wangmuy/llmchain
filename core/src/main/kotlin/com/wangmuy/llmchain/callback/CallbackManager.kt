@@ -15,6 +15,12 @@ open class CallbackManager(
         handlers.remove(handler)
     }
 
+    override fun setHandler(handler: BaseCallbackHandler) {
+        if (!handlers.contains(handler)) {
+            handlers.add(handler)
+        }
+    }
+
     override fun setHandlers(handlers: List<BaseCallbackHandler>) {
         this.handlers = mutableListOf()
         this.handlers.addAll(handlers)

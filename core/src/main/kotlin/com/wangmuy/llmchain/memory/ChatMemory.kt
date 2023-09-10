@@ -1,11 +1,12 @@
 package com.wangmuy.llmchain.memory
 
+import com.wangmuy.llmchain.agent.Agent
 import com.wangmuy.llmchain.schema.*
 
 object Util {
     @JvmStatic
     fun getPromptInputKey(inputs: Map<String, Any>, memoryVariables: List<String>): String {
-        val promptInputKeys = inputs.keys.filter { !memoryVariables.contains(it) && it != "stop" }
+        val promptInputKeys = inputs.keys.filter { !memoryVariables.contains(it) && it != "stop" && it != Agent.AGENT_SCRATCHPAD }
         if (promptInputKeys.size != 1) {
             throw IllegalStateException("One input key expected got $promptInputKeys")
         }
@@ -63,8 +64,12 @@ abstract class BaseChatMemory @JvmOverloads constructor(
 open class ConversationBufferMemory @JvmOverloads constructor(
     val humanPrefix: String = "Human",
     val aiPrefix: String = "AI",
-    val memoryKey: String = "history"
-): BaseChatMemory() {
+    val memoryKey: String = "history",
+    chatMemory: BaseChatMessageHistory = ChatMessageHistory(),
+    outputKey: String? = null,
+    inputKey: String? = null,
+    returnMessages: Boolean = false
+): BaseChatMemory(chatMemory, outputKey, inputKey, returnMessages) {
     fun getBuffer(): List<BaseMessage> {
         return if (returnMessages)
             chatMemory.messages
