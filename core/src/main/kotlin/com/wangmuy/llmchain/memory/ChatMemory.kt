@@ -61,21 +61,27 @@ abstract class BaseChatMemory @JvmOverloads constructor(
     }
 }
 
+// ConversationBufferMemory, ConversationBufferWindowMemory
 open class ConversationBufferMemory @JvmOverloads constructor(
     val humanPrefix: String = "Human",
     val aiPrefix: String = "AI",
     val memoryKey: String = "history",
+    val rounds: Int = -1,
     chatMemory: BaseChatMessageHistory = ChatMessageHistory(),
     outputKey: String? = null,
     inputKey: String? = null,
     returnMessages: Boolean = false
 ): BaseChatMemory(chatMemory, outputKey, inputKey, returnMessages) {
     fun getBuffer(): List<BaseMessage> {
+        var msgList: List<BaseMessage> = chatMemory.messages
+        if (rounds >= 0) {
+            msgList = msgList.takeLast(rounds * 2)
+        }
         return if (returnMessages)
-            chatMemory.messages
+            msgList
         else
             listOf(BaseMessage(Util.getBufferString(
-                chatMemory.messages, humanPrefix, aiPrefix)))
+                msgList, humanPrefix, aiPrefix)))
     }
 
     override fun memoryVariables(): List<String> {
