@@ -15,6 +15,7 @@ dependencies {
     implementation(libs.theokanningOpenai.client)
     implementation(libs.theokanningOpenai.service)
     implementation(libs.jacksonDatabind)
+    implementation(libs.jacksonModuleKotlin)
     implementation(libs.okhttp)
     implementation(libs.okhttp.loggingInterceptor)
     implementation(libs.retrofitJackson)
@@ -24,6 +25,7 @@ dependencies {
     // https://junit.org/junit5/docs/current/user-guide/
     testImplementation(libs.junit)
     testRuntimeOnly("org.junit.vintage:junit-vintage-engine")
+    testImplementation(libs.slf4j.simple)
 }
 
 tasks.test {

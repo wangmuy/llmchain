@@ -1,6 +1,7 @@
 package com.wangmuy.llmchain.serviceprovider.openai
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.theokanning.openai.OpenAiApi
 import com.theokanning.openai.service.OpenAiService
 import okhttp3.OkHttpClient
@@ -46,7 +47,7 @@ class ServiceInfo {
     }
 
     fun createOpenAiService(client: OkHttpClient, baseUrl: String): OpenAiService {
-        val mapper = OpenAiService.defaultObjectMapper()
+        val mapper = OpenAiService.defaultObjectMapper().registerKotlinModule()
         val retrofit = createRetrofit(client, mapper, baseUrl)
         val api: OpenAiApi = retrofit.create(OpenAiApi::class.java)
         return OpenAiService(api, client.dispatcher().executorService())
