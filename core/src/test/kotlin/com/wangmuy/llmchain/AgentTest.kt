@@ -13,7 +13,7 @@ class FakeListLLM(
 ): LLM() {
     private var i = -1
 
-    override fun onInvoke(prompt: String, stop: List<String>?): String {
+    override fun onInvoke(prompt: String, stop: List<String>?, inputList: List<Map<String, Any>>): String {
         this.i += 1
         println("=== Mock Response ${this.i} ===")
         println(responses[this.i])

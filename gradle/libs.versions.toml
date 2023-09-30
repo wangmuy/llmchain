@@ -1,11 +1,13 @@
 [versions]
 okhttp = "3.14.9"
-retrofit = "2.9.0"
-jackson = "2.14.2"
+jackson = "2.15.0"
 ktor = "2.3.2"
 
 [libraries]
 junit = "junit:junit:4.13.2"
+jacksonDatabind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
+jacksonJsonSchema = { module = "com.fasterxml.jackson.module:jackson-module-jsonSchema", version.ref = "jackson" }
+jacksonModuleKotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
 aallam-openai = "com.aallam.openai:openai-client:3.4.0"
 ktor-client-okhttp = { group = "io.ktor", name = "ktor-client-okhttp", version.ref = "ktor" }
 gpt4all = "com.hexadevlabs:gpt4all-java-binding:1.1.3"

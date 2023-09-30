@@ -8,12 +8,12 @@ abstract class LLM(
     verbose: Boolean = false,
     callbackManager: BaseCallbackManager? = null
 ): BaseLLM(verbose, callbackManager) {
-    protected abstract fun onInvoke(prompt: String, stop: List<String>?): String // _call
+    protected abstract fun onInvoke(prompt: String, stop: List<String>?, inputList: List<Map<String, Any>> = emptyList()): String // _call
 
-    override fun onGenerate(prompts: List<String>, stop: List<String>?): LLMResult {
+    override fun onGenerate(prompts: List<String>, stop: List<String>?, inputList: List<Map<String, Any>>): LLMResult {
         val generations = mutableListOf<List<Generation>>()
         for (prompt in prompts) {
-            val text = onInvoke(prompt, stop)
+            val text = onInvoke(prompt, stop, inputList)
             generations.add(listOf(Generation(text)))
         }
         return LLMResult(generations)

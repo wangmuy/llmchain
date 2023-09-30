@@ -39,7 +39,7 @@ class GPT4AllCompletion @JvmOverloads constructor(
         }
     }
 
-    override fun onInvoke(prompt: String, stop: List<String>?): String {
+    override fun onInvoke(prompt: String, stop: List<String>?, inputList: List<Map<String, Any>>): String {
         val configBuilder = LLModel.config()
             .withNPredict(invocationParams[REQ_MAX_TOKENS] as Int)
             .withTopK(invocationParams[REQ_N] as Int)

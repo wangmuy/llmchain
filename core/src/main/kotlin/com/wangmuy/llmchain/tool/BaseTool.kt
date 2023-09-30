@@ -1,6 +1,11 @@
 package com.wangmuy.llmchain.tool
 
 import com.wangmuy.llmchain.callback.BaseCallbackManager
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
+import kotlinx.serialization.json.putJsonArray
+import kotlinx.serialization.json.putJsonObject
 
 abstract class BaseTool @JvmOverloads constructor(
     val name: String,
@@ -25,6 +30,15 @@ abstract class BaseTool @JvmOverloads constructor(
         } catch (e: Exception) {
             callbackManager?.onToolError(e, verbose, args)
             throw e
+        }
+    }
+
+    /** Only used in function call */
+    open fun parameterSchema(): JsonObject {
+        return buildJsonObject {
+            put("type", "object")
+            putJsonObject("properties") {}
+            putJsonArray("required") {}
         }
     }
 }

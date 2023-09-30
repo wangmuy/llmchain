@@ -18,7 +18,10 @@ abstract class BaseChatModel @JvmOverloads constructor(
         return LLMResult(generations, llmOutput)
     }
 
-    override fun generatePrompt(prompts: List<PromptValue>, stop: List<String>?): LLMResult {
+    override fun generatePrompt(
+        prompts: List<PromptValue>,
+        stop: List<String>?,
+        inputList: List<Map<String, Any>>): LLMResult {
         val promptMessages = prompts.map { it.asMessage() }
         val promptStrings = prompts.map { it.asString() }
         callbackManager?.onLLMStart(mapOf("name" to javaClass.name), promptStrings, verbose)

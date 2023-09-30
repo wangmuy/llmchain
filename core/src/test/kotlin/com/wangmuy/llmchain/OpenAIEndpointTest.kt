@@ -101,6 +101,6 @@ class OpenAIEndpointTest {
         )
         val responseMessage = runBlocking { service.chatCompletion(request).choices[0].message }
         val functionCall = responseMessage.functionCall
-        println("functionCall name=${functionCall?.name}, ${functionCall?.arguments}")
+        println("functionCall name=${functionCall?.name}, arguments=${functionCall?.arguments}")
     }
 }

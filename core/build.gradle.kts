@@ -5,14 +5,12 @@ plugins {
     alias(libs.plugins.dokka)
 }
 
-repositories {
-    mavenCentral()
-    google()
-}
-
 dependencies {
     implementation(libs.aallam.openai)
     implementation(libs.ktor.client.okhttp)
+    implementation(libs.jacksonDatabind)
+    implementation(libs.jacksonJsonSchema)
+    implementation(libs.jacksonModuleKotlin)
 
     testImplementation(kotlin("test"))
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")

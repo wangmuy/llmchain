@@ -44,7 +44,7 @@ open class LLMChain @JvmOverloads constructor(
         if (stop.isEmpty()) {
             stop = null
         }
-        return llm.generatePrompt(prompts, stop)
+        return llm.generatePrompt(prompts, stop, inputList)
     }
 
     fun prepPrompts(
