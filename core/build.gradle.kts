@@ -11,14 +11,8 @@ repositories {
 }
 
 dependencies {
-    implementation(libs.theokanningOpenai.api)
-    implementation(libs.theokanningOpenai.client)
-    implementation(libs.theokanningOpenai.service)
-    implementation(libs.jacksonDatabind)
-    implementation(libs.jacksonModuleKotlin)
-    implementation(libs.okhttp)
-    implementation(libs.okhttp.loggingInterceptor)
-    implementation(libs.retrofitJackson)
+    implementation(libs.aallam.openai)
+    implementation(libs.ktor.client.okhttp)
 
     testImplementation(kotlin("test"))
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")

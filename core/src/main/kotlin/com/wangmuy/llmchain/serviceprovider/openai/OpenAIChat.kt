@@ -1,14 +1,15 @@
 package com.wangmuy.llmchain.serviceprovider.openai
 
-import com.theokanning.openai.completion.chat.ChatCompletionRequest
-import com.theokanning.openai.completion.chat.ChatMessage
-import com.theokanning.openai.completion.chat.ChatMessageRole
-import com.theokanning.openai.service.OpenAiService
+import com.aallam.openai.api.chat.ChatCompletionRequest
+import com.aallam.openai.api.chat.ChatMessage
+import com.aallam.openai.api.chat.ChatRole
+import com.aallam.openai.api.model.ModelId
+import com.aallam.openai.client.OpenAI
 import com.wangmuy.llmchain.callback.BaseCallbackManager
 import com.wangmuy.llmchain.llm.BaseLLM
 import com.wangmuy.llmchain.schema.Generation
 import com.wangmuy.llmchain.schema.LLMResult
-import java.net.Proxy
+import kotlinx.coroutines.runBlocking
 
 /**
  * retNum: (aka n) How many completions to generate for each prompt.
@@ -20,7 +21,7 @@ class OpenAIChat @JvmOverloads constructor(
     verbose: Boolean = false,
     baseUrl: String = OPENAI_BASE_URL,
     timeoutMillis: Long = ServiceInfo.TIMEOUT_MILLIS,
-    proxy: Proxy? = null,
+    proxy: String? = null,
 ): BaseLLM(verbose, callbackManager) {
     companion object {
         const val OPENAI_BASE_URL = "https://api.openai.com/"
@@ -32,15 +33,13 @@ class OpenAIChat @JvmOverloads constructor(
         )
     }
 
+    private val openAiService: OpenAI
+
     init {
         DEFAULT_PARAMS.filterNot { it.key in invocationParams }.forEach {
             invocationParams[it.key] = it.value
         }
-    }
 
-    private val openAiService: OpenAiService
-
-    init {
         ServiceHolder.serviceInfo.baseUrl = baseUrl
         ServiceHolder.serviceInfo.apiKey = apiKey
         ServiceHolder.serviceInfo.timeoutMillis = timeoutMillis
@@ -53,56 +52,34 @@ class OpenAIChat @JvmOverloads constructor(
     private fun getChatParams(prompts: List<String>, stop: List<String>?): List<ChatMessage> {
         return mutableListOf<ChatMessage>().also {
             it.addAll(prefixMessages)
-            it.add(ChatMessage(ChatMessageRole.USER.value(), prompts[0]))
+            it.add(ChatMessage(ChatRole.User, prompts[0]))
         }
     }
 
     override fun onGenerate(prompts: List<String>, stop: List<String>?): LLMResult {
         //println("prompt=\n${prompts[0]}")
         val messages = getChatParams(prompts, stop)
-        val builder = ChatCompletionRequest.builder()
-        if (stop != null) {
-            builder.stop(stop)
-        }
-        val maxTokens = invocationParams[REQ_MAX_TOKENS] as Int?
-        if (maxTokens != null && maxTokens > 0) {
-            builder.maxTokens(maxTokens)
-        }
-        val userName = invocationParams[REQ_USER_NAME] as String?
-        if (userName != null) {
-            builder.user(userName)
-        }
         val modelName = invocationParams[REQ_MODEL_NAME] as String
-        val retNum = invocationParams[REQ_N] as Int? ?: 1
-        builder.model(modelName).messages(messages).n(retNum)
-        val temperature = invocationParams[REQ_TEMPERATURE] as Double?
-        if (temperature != null) {
-            builder.temperature(temperature)
-        }
-        val topP = invocationParams[REQ_TOP_P] as Double?
-        if (topP != null) {
-            builder.topP(topP)
-        }
-        val frequencyPenalty = invocationParams[REQ_FREQUENCY_PENALTY] as Double?
-        if (frequencyPenalty != null) {
-            builder.frequencyPenalty(frequencyPenalty)
-        }
-        val presencePenalty = invocationParams[REQ_PRESENCE_PENALTY] as Double?
-        if (presencePenalty != null) {
-            builder.presencePenalty(presencePenalty)
-        }
-        val biases = invocationParams[REQ_LOGIT_BIAS] as Map<String, Int>?
-        if (biases != null) {
-            builder.logitBias(biases)
-        }
-        // TODO retry
+        val request = ChatCompletionRequest(
+            messages = messages,
+            stop = stop,
+            maxTokens = invocationParams[REQ_MAX_TOKENS] as Int?,
+            user = invocationParams[REQ_USER_NAME] as String?,
+            model = ModelId(modelName),
+            n = invocationParams[REQ_N] as Int?,
+            temperature = invocationParams[REQ_TEMPERATURE] as Double?,
+            topP = invocationParams[REQ_TOP_P] as Double?,
+            frequencyPenalty = invocationParams[REQ_FREQUENCY_PENALTY] as Double?,
+            presencePenalty = invocationParams[REQ_PRESENCE_PENALTY] as Double?,
+            logitBias = invocationParams[REQ_LOGIT_BIAS] as Map<String, Int>?
+        )
 
-        val response = openAiService.createChatCompletion(builder.build())
+        val response = runBlocking { openAiService.chatCompletion(request) }
         //println("rsp=\n${response.choices[0].message.content}")
         return LLMResult(
-            listOf(listOf(Generation(response.choices[0].message.content))),
+            listOf(listOf(Generation(response.choices[0].message!!.content!!))),
             mapOf(
-                RSP_TOKEN_USAGE to response.usage,
+                RSP_TOKEN_USAGE to response.usage as Any,
                 REQ_MODEL_NAME to modelName))
     }
 }

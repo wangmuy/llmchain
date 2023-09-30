@@ -1,17 +1,18 @@
 package com.wangmuy.llmchain.serviceprovider.openai
 
-import com.theokanning.openai.embedding.EmbeddingRequest
-import com.theokanning.openai.service.OpenAiService
+import com.aallam.openai.api.embedding.EmbeddingRequest
+import com.aallam.openai.api.model.ModelId
+import com.aallam.openai.client.OpenAI
 import com.wangmuy.llmchain.embedding.Embeddings
-import java.net.Proxy
+import kotlinx.coroutines.runBlocking
 
 class OpenAIEmbedding(
     apiKey: String,
     baseUrl: String = OpenAIChat.OPENAI_BASE_URL,
     timeoutMillis: Long = ServiceInfo.TIMEOUT_MILLIS,
-    proxy: Proxy? = null
+    proxy: String? = null
 ): Embeddings {
-    private val openAiService: OpenAiService
+    private val openAiService: OpenAI
     init {
         ServiceHolder.serviceInfo.baseUrl = baseUrl
         ServiceHolder.serviceInfo.apiKey = apiKey
@@ -21,11 +22,11 @@ class OpenAIEmbedding(
     }
 
     override fun embedDocuments(texts: List<String>): List<Array<Float>> {
-        val request = EmbeddingRequest.builder()
-            .model("text-similarity-babbage-001")
-            .input(texts)
-            .build()
-        val embeddings = openAiService.createEmbeddings(request).data
+        val request = EmbeddingRequest(
+            model = ModelId("text-similarity-babbage-001"),
+            input = texts
+        )
+        val embeddings = runBlocking { openAiService.embeddings(request).embeddings }
         return embeddings.map {emb-> emb.embedding.map { it.toFloat() }.toTypedArray() }
     }
 

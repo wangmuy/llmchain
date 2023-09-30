@@ -8,13 +8,14 @@ import java.net.Proxy
 
 class OpenAIChatTest {
     companion object {
-        const val BASEURL = "https://api.openai.com/" // Fastchat http://localhost:8000/v1/
+        const val BASEURL = "https://api.openai.com/v1/" // Fastchat http://localhost:8000/v1/
         val APIKEY = "src/test/resources/private.properties".filePathAsProperties().getProperty("APIKEY")
-        val PROXY: Proxy? = null//Proxy(Proxy.Type.SOCKS, InetSocketAddress("127.0.0.1", 1090))
+        val PROXY: String? = "socks5://127.0.0.1:1090"
+        val TIMEOUT_MILLIS: Long = 60000
     }
 
     @Test fun testOpenAIChat() {
-        val llm = OpenAIChat(apiKey = APIKEY, baseUrl = BASEURL, timeoutMillis = 600000, proxy = PROXY)
+        val llm = OpenAIChat(apiKey = APIKEY, baseUrl = BASEURL, timeoutMillis = TIMEOUT_MILLIS, proxy = PROXY)
         llm.invocationParams[BaseLLM.REQ_MODEL_NAME] = "gpt-3.5-turbo"//"gpt-3.5-turbo"// "fastchat-t5-3b-v1.0"
         llm.invocationParams[BaseLLM.REQ_MAX_TOKENS] = 40
 //        llm.invocationParams[BaseLLM.REQ_TEMPERATURE] = 0.0
