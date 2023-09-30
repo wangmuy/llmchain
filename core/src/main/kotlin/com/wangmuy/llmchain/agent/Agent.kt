@@ -92,6 +92,9 @@ abstract class Agent @JvmOverloads constructor(
             fullOutput += output
             parsedOutput = extractToolAndInput(fullOutput)
         }
+        if (parsedOutput.first.isEmpty()) {
+            return AgentAction(finishToolName(), parsedOutput.second, fullOutput)
+        }
         return AgentAction(parsedOutput.first, parsedOutput.second, fullOutput)
     }
 

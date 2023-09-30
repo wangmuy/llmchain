@@ -76,8 +76,8 @@ class OpenAIChat @JvmOverloads constructor(
         val funcMode = (funcInfoMap?.get(FunctionUtil.KEY_FUNCTION_MODE) as String?).let {
             when (it) {
                 "auto" -> FunctionMode.Auto
-                "none", "" -> FunctionMode.None
-                else -> null
+                "none" -> FunctionMode.None
+                else -> if (functions != null) FunctionMode.Auto else null
             }
         }
 
@@ -97,9 +97,11 @@ class OpenAIChat @JvmOverloads constructor(
             functionCall = funcMode
         )
 
-        val response = runBlocking { openAiService.chatCompletion(request) }
+        val response = runBlocking {
+            openAiService.chatCompletion(request)
+        }
         val msg = response.choices[0].message
-        val content = msg.content ?: ""
+        var content = msg.content ?: ""
         val outputMap = mutableMapOf(
             RSP_TOKEN_USAGE to response.usage as Any,
             REQ_MODEL_NAME to modelName,
@@ -113,6 +115,7 @@ class OpenAIChat @JvmOverloads constructor(
             }
         } else null
         if (funcJson != null) {
+            content += "\n${FunctionUtil.FUNCTION_CALL_PREFIX} $funcJson\n"
             outputMap[FunctionUtil.KEY_FUNCTION_CALL] = funcJson
         }
         //println("rsp=\n${response.choices[0].message.content}")

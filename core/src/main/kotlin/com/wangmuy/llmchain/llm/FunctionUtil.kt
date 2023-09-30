@@ -11,6 +11,7 @@ import kotlinx.serialization.json.putJsonObject
 object FunctionUtil {
     const val KEY_FUNCTION_CALL = "_functionCall"
     const val KEY_FUNCTION_MODE = "_functionMode"
+    const val FUNCTION_CALL_PREFIX = "FunctionCall:"
 
     fun formatToolToOpenAIFunctionString(
         name: String,

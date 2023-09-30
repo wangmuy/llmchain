@@ -6,6 +6,8 @@ import com.wangmuy.llmchain.prompt.PromptTemplate
 import com.wangmuy.llmchain.prompt.fStringFormat
 import com.wangmuy.llmchain.schema.BaseLanguageModel
 import com.wangmuy.llmchain.tool.BaseTool
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
@@ -35,6 +37,7 @@ Thought:{agent_scratchpad}"""
 
         private val PATTERN_ACTION = Pattern.compile("Action\\s*\\d*: (.*?)")
         private val PATTERN_ACTION_INPUT = Pattern.compile("Action Input:\\s*(.*)")
+        private val PATTERN_FUNCTION_CALL = Pattern.compile("\\s*FunctionCall:\\s*(.*)")
     }
 
     override fun observationPrefix(): String {
@@ -74,7 +77,26 @@ Thought:{agent_scratchpad}"""
             }
         }
         if (action == null || actionInput == null) {
-            throw IllegalStateException("Could not parse LLM output: $llmOutput")
+            // function call?
+            for (line in lines) {
+                val matcher = PATTERN_FUNCTION_CALL.matcher(line)
+                if (matcher.matches()) {
+                    try {
+                        val jsonStr = matcher.group(1).trim()
+                        val json = Json.parseToJsonElement(jsonStr)
+                        if (json is JsonObject) {
+                            action = json["name"].toString().trim { it.isWhitespace() || it == '\"' }
+                            actionInput = json["arguments"].toString().trim { it.isWhitespace() || it == '\"' }
+                        }
+                    } catch (e: Exception) {
+                        // ignore
+                    }
+                    break
+                }
+            }
+        }
+        if (action == null || actionInput == null) {
+            return Pair("", llmOutput)
         }
         return Pair(action, actionInput)
     }
@@ -155,7 +177,7 @@ Thought:{agent_scratchpad}"""
         var tools: List<BaseTool>? = null
         var callbackManager: BaseCallbackManager? = null
         var args: Map<String, Any>? = null
-        val promptBuilder: PromptBuilder = PromptBuilder()
+        var promptBuilder: PromptBuilder = PromptBuilder()
 
         override fun self(): Builder {
             return this
