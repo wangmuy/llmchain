@@ -19,7 +19,11 @@ open class AgentFinish(
 open class Generation @JvmOverloads constructor(
     val text: String,
     val generationInfo: Map<String, Any>? = null
-)
+) {
+    override fun toString(): String {
+        return "Generation(text='$text', generationInfo=$generationInfo)"
+    }
+}
 
 open class BaseMessage @JvmOverloads constructor(
     val content: String,
@@ -58,6 +62,15 @@ open class SystemMessage @JvmOverloads constructor(
     }
 }
 
+open class FunctionMessage @JvmOverloads constructor(
+    name: String,
+    content: String, additionalArgs: Map<String, String>? = null)
+    : BaseMessage(content, additionalArgs) {
+    override fun msgType(): String {
+        return "function"
+    }
+}
+
 open class ChatMessage @JvmOverloads constructor(
     val role: String, content: String, additionalArgs: Map<String, String>? = null)
     : BaseMessage(content, additionalArgs) {
@@ -73,7 +86,11 @@ open class ChatResult(val generations: List<ChatGeneration>, val llmOutput: Map<
 open class LLMResult @JvmOverloads constructor(
         val generations: List<List<Generation>>,
         val llmOutput: Map<String, Any>? = null
-)
+) {
+    override fun toString(): String {
+        return "LLMResult(generations=$generations, llmOutput=$llmOutput)"
+    }
+}
 
 abstract class PromptValue {
     abstract fun asString(): String
@@ -85,7 +102,10 @@ abstract class PromptValue {
 
 abstract class BaseLanguageModel(var callbackManager: BaseCallbackManager? = null) {
     abstract fun generatePrompt(
-        prompts: List<PromptValue>, stop: List<String>?): LLMResult
+        prompts: List<PromptValue>,
+        stop: List<String>?,
+        inputList: List<Map<String, Any>> = emptyList()
+    ): LLMResult
 }
 
 abstract class BaseMemory {

@@ -22,22 +22,30 @@ abstract class BaseLLM @JvmOverloads constructor(
         //        const val REQ_BEST_OF = "best_of"
         const val REQ_LOGIT_BIAS = "logit_bias"
         const val RSP_TOKEN_USAGE = "token_usage"
+        const val RSP_MESSAGE = "message"
     }
 
     private var cache: Boolean = false
 
-    override fun generatePrompt(prompts: List<PromptValue>, stop: List<String>?): LLMResult {
+    override fun generatePrompt(
+        prompts: List<PromptValue>,
+        stop: List<String>?,
+        inputList: List<Map<String, Any>>): LLMResult {
         val promptStrings = prompts.map { it.asString() }.toCollection(mutableListOf())
-        return generate(promptStrings, stop)
+        return generate(promptStrings, stop, inputList)
     }
 
-    abstract fun onGenerate(prompts: List<String>, stop: List<String>?): LLMResult
+    abstract fun onGenerate(prompts: List<String>, stop: List<String>?, inputList: List<Map<String, Any>>): LLMResult
 
-    fun generate(prompts: List<String>, stop: List<String>?): LLMResult {
+    fun generate(
+        prompts: List<String>,
+        stop: List<String>?,
+        inputList: List<Map<String, Any>> = emptyList()
+    ): LLMResult {
         if (!cache) {
             callbackManager?.onLLMStart(mapOf("name" to this::class.simpleName as Any), prompts, verbose)
             try {
-                val output = onGenerate(prompts, stop)
+                val output = onGenerate(prompts, stop, inputList)
                 callbackManager?.onLLMEnd(output, verbose)
                 return output
             } catch (e: Exception) {
@@ -49,7 +57,11 @@ abstract class BaseLLM @JvmOverloads constructor(
         throw IllegalStateException("todo")
     }
 
-    override fun invoke(prompt: String, stop: List<String>?): String {
-        return generate(listOf(prompt), stop).generations[0][0].text
+    fun invoke(prompt: String, stop: List<String>?): String {
+        return invoke(prompt, stop, emptyList())
+    }
+
+    override fun invoke(prompt: String, stop: List<String>?, inputList: List<Map<String, Any>>): String {
+        return generate(listOf(prompt), stop, inputList).generations[0][0].text
     }
 }

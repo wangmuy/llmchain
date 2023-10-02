@@ -28,4 +28,9 @@ abstract class BaseTool @JvmOverloads constructor(
             throw e
         }
     }
+
+    /** Only used in function call */
+    open fun parameterSchema(): Any {
+        return Any()
+    }
 }

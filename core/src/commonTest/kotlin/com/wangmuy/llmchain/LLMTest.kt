@@ -20,7 +20,7 @@ class FakeOutputParser: BaseOutputParser<String> {
 }
 
 class FakeLLM(private val queries: Map<String, String>? = null): LLM() {
-    override fun onInvoke(prompt: String, stop: List<String>?): String {
+    override fun onInvoke(prompt: String, stop: List<String>?, inputList: List<Map<String, Any>>): String {
         if (queries != null) {
             return queries[prompt]!!
         }
