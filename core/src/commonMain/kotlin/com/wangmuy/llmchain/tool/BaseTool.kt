@@ -10,7 +10,7 @@ abstract class BaseTool @JvmOverloads constructor(
     val verbose: Boolean = false,
     var callbackManager: BaseCallbackManager? = null
 ): BaseToolInvoker {
-    protected abstract fun onRun(toolInput: String, args: Map<String, Any>?): String // _run
+    abstract fun onRun(toolInput: String, args: Map<String, Any>?): String // _run
 
     override fun invoke(toolInput: String, args: Map<String, Any>?): String {
         return run(toolInput, verbose, args)
@@ -29,7 +29,10 @@ abstract class BaseTool @JvmOverloads constructor(
         }
     }
 
-    /** Only used in function call */
+    /**
+     * Only used in function call
+     * @return JsonObject
+     */
     open fun parameterSchema(): Any {
         return Any()
     }

@@ -2,6 +2,7 @@ package com.wangmuy.llmchain.agent
 
 import com.wangmuy.llmchain.callback.BaseCallbackManager
 import com.wangmuy.llmchain.chain.LLMChain
+import com.wangmuy.llmchain.llm.FunctionUtil
 import com.wangmuy.llmchain.prompt.PromptTemplate
 import com.wangmuy.llmchain.prompt.fStringFormat
 import com.wangmuy.llmchain.schema.BaseLanguageModel
@@ -34,6 +35,7 @@ Thought:{agent_scratchpad}"""
 
         private val PATTERN_ACTION = Regex("Action\\s*\\d*: (.*)")
         private val PATTERN_ACTION_INPUT = Regex("Action Input\\s*\\d*:\\s*(.*)")
+        private val PATTERN_FUNCTION_CALL = Regex("\\s*FunctionCall:\\s*(.*)")
     }
 
     override fun observationPrefix(): String {
@@ -75,7 +77,27 @@ Thought:{agent_scratchpad}"""
             }
         }
         if (action == null || actionInput == null) {
-            throw IllegalStateException("Could not parse LLM output: $llmOutput")
+            // function call?
+            for (line in lines) {
+                val matcher = PATTERN_FUNCTION_CALL.find(line)
+                if (matcher != null) {
+                    try {
+                        val jsonStr = matcher.groupValues[1].trim()
+                        val parser = FunctionUtil.parser
+                        val json = parser?.parseToJson(jsonStr)
+                        if (json != null) {
+                            action = parser.get(json, "name")?.toString()?.trim { it.isWhitespace() || it == '\"' }
+                            actionInput = parser.get(json, "arguments")?.toString()?.trim { it.isWhitespace() || it == '\"' }
+                        }
+                    } catch (e: Exception) {
+                        // ignore
+                    }
+                    break
+                }
+            }
+        }
+        if (action == null || actionInput == null) {
+            return Pair("", llmOutput)
         }
         return Pair(action, actionInput)
     }
@@ -156,7 +178,7 @@ Thought:{agent_scratchpad}"""
         var tools: List<BaseTool>? = null
         var callbackManager: BaseCallbackManager? = null
         var args: Map<String, Any>? = null
-        val promptBuilder_: PromptBuilder = PromptBuilder()
+        var promptBuilder_: PromptBuilder = PromptBuilder()
 
         override fun self(): Builder {
             return this
