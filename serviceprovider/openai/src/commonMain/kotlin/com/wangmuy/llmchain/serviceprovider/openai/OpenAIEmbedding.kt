@@ -27,7 +27,7 @@ class OpenAIEmbedding(
             input = texts
         )
         val embeddings = runBlockingKMP { openAiService.embeddings(request).embeddings }
-        return embeddings.map {emb-> emb.embedding.map { it.toFloat() }.toTypedArray() }
+        return embeddings.map {emb-> emb.embedding.map {d-> d.toFloat() }.toTypedArray() }
     }
 
     override fun embedQuery(text: String): Array<Float> {
