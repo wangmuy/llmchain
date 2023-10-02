@@ -127,6 +127,8 @@ output = conversation.invoke(mapOf("input" to "I'm doing well! Just having a con
   - [x] LLMChain
   - [ ] LLMMathChain: currently use LLM, not the actual calculator
   - [x] ConversationChain
+  - [x] RouterChain/MultiRouteChain/LLMRouterChain/MultiPromptChain Note: Only available in jvm/native due to limited implementation of `RegexOption.DOT_MATCHES_ALL`
+  - [x] SequentialChain/SimpleSequentialChain
 - Agent
   - [x] Agent
   - [x] AgentExecutor
