@@ -5,8 +5,8 @@ import com.wangmuy.llmchain.schema.BaseMemory
 
 abstract class Chain @JvmOverloads constructor(
     var memory: BaseMemory? = null,
-    var callbackManager: BaseCallbackManager? = null,
-    val verbose: Boolean = false
+    open var callbackManager: BaseCallbackManager? = null,
+    var verbose: Boolean = false
 ): (Map<String, Any>?) -> Map<String, Any> {
     companion object {
         const val KEY_NAME = "name"

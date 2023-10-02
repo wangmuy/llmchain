@@ -4,9 +4,10 @@ import com.wangmuy.llmchain.callback.BaseCallbackManager
 import com.wangmuy.llmchain.prompt.BasePromptTemplate
 import com.wangmuy.llmchain.schema.BaseLanguageModel
 import com.wangmuy.llmchain.schema.BaseMemory
+import com.wangmuy.llmchain.schema.BaseOutputParser
 import com.wangmuy.llmchain.schema.LLMResult
 import com.wangmuy.llmchain.schema.PromptValue
-import java.util.*
+import java.util.Collections
 
 open class LLMChain @JvmOverloads constructor(
     val prompt: BasePromptTemplate,
@@ -23,6 +24,13 @@ open class LLMChain @JvmOverloads constructor(
             llm.callbackManager = callbackManager
         }
     }
+
+    override var callbackManager: BaseCallbackManager?
+        get() = super.callbackManager
+        set(value) {
+            super.callbackManager = value
+            llm.callbackManager = value
+        }
 
     override fun inputKeys(): List<String>? {
         return prompt.inputVariables
@@ -73,15 +81,22 @@ open class LLMChain @JvmOverloads constructor(
         for (generation in response.generations) {
             outputs.add(mapOf(outputKey to generation[0].text))
         }
-        // apply_and_parse
-        return prompt.outputParser?.let {parser->
-            outputs.map { it.mapValues {entry-> parser.parse(entry.value)} }
-        } ?: outputs
+        return outputs
+    }
+
+    fun <T> applyAndParse(inputList: List<Map<String, Any>>): List<T> {
+        val result = apply(inputList)
+        val parser = prompt.outputParser as BaseOutputParser<T>
+        return result.map { parser.parse(it[outputKey]!!) }
     }
 
     fun predict(inputs: Map<String, Any>): String {
-        // predict_and_parse
-        val result = invoke(inputs)[outputKey]!!.toString()
-        return prompt.outputParser?.parse(result) ?: result
+        return invoke(inputs)[outputKey]!!.toString()
+    }
+
+    fun <T> predictAndParse(inputs: Map<String, Any>): T {
+        val result = predict(inputs)
+        val parser = prompt.outputParser as BaseOutputParser<T>
+        return parser.parse(result)
     }
 }

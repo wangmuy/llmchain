@@ -5,7 +5,7 @@ import com.wangmuy.llmchain.schema.BaseOutputParser
 open class PromptTemplate @JvmOverloads constructor(
     inputVariables: List<String>,
     private val template: String,
-    outputParser: BaseOutputParser<String>? = null,
+    outputParser: BaseOutputParser<Any>? = null,
     private val templateFormat: String = TEMPLATE_FORMAT_FSTRING,
     private val validateTemplate: Boolean = true
 ): StringPromptTemplate(inputVariables, outputParser) {

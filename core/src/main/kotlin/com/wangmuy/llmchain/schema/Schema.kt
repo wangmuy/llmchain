@@ -158,7 +158,9 @@ interface BaseOutputParser<T> {
         return parse(completion)
     }
 
-    fun getFormatInstructions(): String
+    fun getFormatInstructions(): String {
+        throw NotImplementedError("Default not implemented")
+    }
 }
 
 class OutputParserException(message: String = "", cause: Throwable?): Exception(message, cause)

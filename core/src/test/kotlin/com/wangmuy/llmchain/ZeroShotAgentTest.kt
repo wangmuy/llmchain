@@ -127,11 +127,13 @@ class ZeroShotAgentTest {
 
         val (tools, query) = getToolsAndQuestionQuickStart(llm)//getToolsAndQuestionWeather(llm)
         val callbackManager = CallbackManager(mutableListOf(callbackHandler))
+
+        // see also: https://community.openai.com/t/converting-a-react-prompt-to-use-function-calling/264914
         // 1. disable buildToolStrings
         val promptBuilder = object: ZeroShotAgent.PromptBuilder() {
-//            override fun buildToolStrings(): String {
-//                return ""
-//            }
+            override fun buildToolStrings(): String {
+                return ""
+            }
         }.also {
             it.prefix = "Answer the following questions as best you can."
             // since function calling is used, we can remove "Action" and "Action Input" from the format instructions

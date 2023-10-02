@@ -114,7 +114,9 @@ class OpenAIChat @JvmOverloads constructor(
                 put("arguments", functionCall.argumentsAsJson())
             }
         } else null
-        if (funcJson != null) {
+        val hasFunctionCallOutput = content.contains(FunctionUtil.FUNCTION_CALL_PREFIX)
+//        println(">>>>> hasFunctionCallOutput=$hasFunctionCallOutput")
+        if (funcJson != null && !hasFunctionCallOutput) {
             content += "\n${FunctionUtil.FUNCTION_CALL_PREFIX} $funcJson\n"
             outputMap[FunctionUtil.KEY_FUNCTION_CALL] = funcJson
         }

@@ -13,9 +13,10 @@ open class ConversationChain @JvmOverloads constructor(
     prompt: BasePromptTemplate = PROMPT,
     memory: BaseMemory = ConversationBufferMemory(),
     val inputKey: String = INPUT_KEY,
+    outputKey: String = OUTPUT_KEY,
     callbackManager: BaseCallbackManager? = null,
     verbose: Boolean = false
-): LLMChain(prompt, llm, memory = memory, outputKey = OUTPUT_KEY,
+): LLMChain(prompt, llm, memory = memory, outputKey = outputKey,
     callbackManager = callbackManager, verbose = verbose) {
     override fun inputKeys(): List<String>? {
         return Collections.singletonList(inputKey)

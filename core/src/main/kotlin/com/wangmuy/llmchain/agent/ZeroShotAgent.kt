@@ -2,14 +2,14 @@ package com.wangmuy.llmchain.agent
 
 import com.wangmuy.llmchain.callback.BaseCallbackManager
 import com.wangmuy.llmchain.chain.LLMChain
+import com.wangmuy.llmchain.llm.FunctionUtil
 import com.wangmuy.llmchain.prompt.PromptTemplate
 import com.wangmuy.llmchain.prompt.fStringFormat
 import com.wangmuy.llmchain.schema.BaseLanguageModel
 import com.wangmuy.llmchain.tool.BaseTool
+import com.wangmuy.llmchain.utils.toStringWithoutQuotes
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
-import java.util.regex.Matcher
-import java.util.regex.Pattern
 
 open class ZeroShotAgent(
     llmChain: LLMChain,
@@ -35,9 +35,9 @@ Final Answer: the final answer to the original input question"""
 Question: {input}
 Thought:{agent_scratchpad}"""
 
-        private val PATTERN_ACTION = Pattern.compile("Action\\s*\\d*: (.*?)")
-        private val PATTERN_ACTION_INPUT = Pattern.compile("Action Input:\\s*(.*)")
-        private val PATTERN_FUNCTION_CALL = Pattern.compile("\\s*FunctionCall:\\s*(.*)")
+        private val PATTERN_ACTION = Regex("Action\\s*\\d*: (.*)")
+        private val PATTERN_ACTION_INPUT = Regex("Action Input\\s*\\d*:\\s*(.*)")
+        private val PATTERN_FUNCTION_CALL = Regex("\\s*${FunctionUtil.FUNCTION_CALL_PREFIX}\\s*(.*)")
     }
 
     override fun observationPrefix(): String {
@@ -64,29 +64,29 @@ Thought:{agent_scratchpad}"""
         var action: String? = null
         var actionInput: String? = null
         for (line in lines) {
-            var matcher: Matcher?
-            matcher = if (action == null) PATTERN_ACTION.matcher(line) else null
-            if (matcher != null && matcher.matches()) {
-                action = matcher.group(1)?.trim{ c -> !c.isLetterOrDigit() && c != '_'}
+            var matchResult: MatchResult?
+            matchResult = if (action == null) PATTERN_ACTION.find(line) else null
+            if (matchResult != null) {
+                action = matchResult.groupValues[1].trim{ c -> !c.isLetterOrDigit() && c != '_'}
                 continue
             }
-            matcher = if (actionInput == null) PATTERN_ACTION_INPUT.matcher(line) else null
-            if (matcher != null && matcher.matches()) {
-                actionInput = matcher.group(1)?.trim{ c -> c.isWhitespace() || c == '"'}
+            matchResult = if (actionInput == null) PATTERN_ACTION_INPUT.find(line) else null
+            if (matchResult != null) {
+                actionInput = matchResult.groupValues[1].trim{ c -> c.isWhitespace() || c == '"'}
                 continue
             }
         }
         if (action == null || actionInput == null) {
             // function call?
             for (line in lines) {
-                val matcher = PATTERN_FUNCTION_CALL.matcher(line)
-                if (matcher.matches()) {
+                val matchResult = PATTERN_FUNCTION_CALL.find(line)
+                if (matchResult != null) {
                     try {
-                        val jsonStr = matcher.group(1).trim()
+                        val jsonStr = matchResult.groupValues[1].trim()
                         val json = Json.parseToJsonElement(jsonStr)
                         if (json is JsonObject) {
-                            action = json["name"].toString().trim { it.isWhitespace() || it == '\"' }
-                            actionInput = json["arguments"].toString().trim { it.isWhitespace() || it == '\"' }
+                            action = json["name"]?.toStringWithoutQuotes()
+                            actionInput = json["arguments"]?.toStringWithoutQuotes()
                         }
                     } catch (e: Exception) {
                         // ignore

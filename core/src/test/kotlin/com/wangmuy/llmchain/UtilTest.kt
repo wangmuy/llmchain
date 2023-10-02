@@ -1,5 +1,6 @@
 package com.wangmuy.llmchain
 
+import com.wangmuy.llmchain.outputparser.JsonOutputParser
 import com.wangmuy.llmchain.prompt.PromptTemplate
 import com.wangmuy.llmchain.prompt.fStringFormat
 import com.wangmuy.llmchain.schema.BaseMessage
@@ -7,6 +8,7 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Test
 
 class UtilTest {
@@ -46,5 +48,22 @@ input=hello""".trimMargin(), prompt)
         println("json=$json")
         val name = json["name"]?.jsonPrimitive?.content
         println("name=${name}")
+    }
+
+    @Test fun jsonQuotedParseTest() {
+        val jsonQuoted = """  ```json
+{
+"k1": "v1",
+"k2": "v2"
+}
+```""".trimMargin()
+        var result: MatchResult? = null
+        result = JsonOutputParser.PATTERN_JSON_QUOTED.find(jsonQuoted)
+        assertNotNull(result)
+        println("result1=${result?.groupValues?.get(2)}")
+        val quoted2 = "\n$jsonQuoted\n"
+        result = JsonOutputParser.PATTERN_JSON_QUOTED.find(quoted2)
+        assertNotNull(result)
+        println("result2=${result?.groupValues?.get(2)}")
     }
 }
