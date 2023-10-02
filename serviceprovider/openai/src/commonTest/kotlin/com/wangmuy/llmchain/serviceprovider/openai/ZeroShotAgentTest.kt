@@ -9,6 +9,7 @@ import com.wangmuy.llmchain.chain.LLMMathChain
 import com.wangmuy.llmchain.llm.BaseLLM
 import com.wangmuy.llmchain.llm.FunctionUtil
 import com.wangmuy.llmchain.llm.withDefaultParameterSchema
+import com.wangmuy.llmchain.outputparser.JsonOutputParser
 import com.wangmuy.llmchain.schema.LLMResult
 import com.wangmuy.llmchain.tool.BaseTool
 import kotlinx.serialization.json.*
@@ -152,13 +153,17 @@ Final Answer: the final answer to the original input question"""
         val agent = agentBuilder.build()
         val agentExecutor = AgentExecutor(agent, tools, callbackManager)
         agentExecutor.maxIterations = 4
-        FunctionUtil.parser = object : FunctionUtil.JsonParser {
+        JsonOutputParser.parser = object : JsonOutputParser.JsonParser {
             override fun parseToJson(str: String): Any {
                 return Json.parseToJsonElement(str)
             }
 
             override fun get(json: Any, key: String): Any? {
                 return (json as JsonObject)[key]
+            }
+
+            override fun getKeys(json: Any): Set<String> {
+                return (json as JsonObject).keys
             }
         }
         // 2. add function call tools input

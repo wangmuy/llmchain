@@ -2,7 +2,7 @@ package com.wangmuy.llmchain.agent
 
 import com.wangmuy.llmchain.callback.BaseCallbackManager
 import com.wangmuy.llmchain.chain.LLMChain
-import com.wangmuy.llmchain.llm.FunctionUtil
+import com.wangmuy.llmchain.outputparser.JsonOutputParser
 import com.wangmuy.llmchain.prompt.PromptTemplate
 import com.wangmuy.llmchain.prompt.fStringFormat
 import com.wangmuy.llmchain.schema.BaseLanguageModel
@@ -83,7 +83,7 @@ Thought:{agent_scratchpad}"""
                 if (matcher != null) {
                     try {
                         val jsonStr = matcher.groupValues[1].trim()
-                        val parser = FunctionUtil.parser
+                        val parser = JsonOutputParser.parser
                         val json = parser?.parseToJson(jsonStr)
                         if (json != null) {
                             action = parser.get(json, "name")?.toString()?.trim { it.isWhitespace() || it == '\"' }

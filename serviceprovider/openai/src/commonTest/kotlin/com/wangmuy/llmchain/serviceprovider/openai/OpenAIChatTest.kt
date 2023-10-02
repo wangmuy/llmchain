@@ -10,10 +10,10 @@ import kotlin.test.Test
 // use specific platform to run test(jvmMain/nativeMain/jsMain)
 class OpenAIChatTest {
     companion object {
-        private const val APIKEY = openAIKey
-        private const val BASEURL = openAIBaseUrl
-        private const val TIMEOUT_MILLIS: Long = openAITimeoutMillis
-        private val PROXY = openAIProxy
+        const val APIKEY = openAIKey
+        const val BASEURL = openAIBaseUrl
+        const val TIMEOUT_MILLIS: Long = openAITimeoutMillis
+        val PROXY = openAIProxy
     }
 
     @Test fun testOpenAIChat() {

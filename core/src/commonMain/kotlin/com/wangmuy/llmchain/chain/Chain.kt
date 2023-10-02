@@ -6,8 +6,8 @@ import kotlin.jvm.JvmOverloads
 
 abstract class Chain @JvmOverloads constructor(
     var memory: BaseMemory? = null,
-    var callbackManager: BaseCallbackManager? = null,
-    val verbose: Boolean = false
+    open var callbackManager: BaseCallbackManager? = null,
+    var verbose: Boolean = false
 ): ChainInvoker {
     companion object {
         const val KEY_NAME = "name"

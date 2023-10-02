@@ -1,6 +1,5 @@
 package com.wangmuy.llmchain.llm
 
-import com.wangmuy.llmchain.callback.BaseCallbackManager
 import com.wangmuy.llmchain.tool.BaseTool
 import kotlinx.serialization.json.*
 

@@ -51,10 +51,10 @@ class LLMTest {
     }
 
     @Test fun testPredictAndParse() {
-        val prompt = PromptTemplate(inputVariables = listOf("foo"), template = "{foo}", outputParser = FakeOutputParser())
+        val prompt = PromptTemplate(inputVariables = listOf("foo"), template = "{foo}", outputParser = FakeOutputParser() as BaseOutputParser<Any>)
         val llm = FakeLLM(mapOf("foo" to "foo  \n  bar"))
         val chain = LLMChain(prompt, llm)
-        val output = chain.predict(mapOf("foo" to "foo"))
+        val output = chain.predictAndParse<String>(mapOf("foo" to "foo"))
         assertEquals("foo bar", output)
     }
 }
