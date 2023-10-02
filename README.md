@@ -155,6 +155,7 @@ output = conversation.invoke(mapOf("input" to "I'm doing well! Just having a con
   - [x] OpenAI 
     - [x] OpenAIChat
     - [x] OpenAIEmbedding
+    - [x] Function Calling
 
 ## License
 ```text
