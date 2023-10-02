@@ -1,5 +1,6 @@
 package com.wangmuy.llmchain.memory
 
+import com.wangmuy.llmchain.agent.Agent
 import com.wangmuy.llmchain.schema.*
 import kotlin.jvm.JvmOverloads
 import kotlin.jvm.JvmStatic
@@ -7,7 +8,7 @@ import kotlin.jvm.JvmStatic
 object Util {
     @JvmStatic
     fun getPromptInputKey(inputs: Map<String, Any>, memoryVariables: List<String>): String {
-        val promptInputKeys = inputs.keys.filter { !memoryVariables.contains(it) && it != "stop" }
+        val promptInputKeys = inputs.keys.filter { !memoryVariables.contains(it) && it != "stop" && it != Agent.AGENT_SCRATCHPAD }
         if (promptInputKeys.size != 1) {
             throw IllegalStateException("One input key expected got $promptInputKeys")
         }
@@ -62,17 +63,27 @@ abstract class BaseChatMemory @JvmOverloads constructor(
     }
 }
 
+// ConversationBufferMemory, ConversationBufferWindowMemory
 open class ConversationBufferMemory @JvmOverloads constructor(
     val humanPrefix: String = "Human",
     val aiPrefix: String = "AI",
-    val memoryKey: String = "history"
-): BaseChatMemory() {
+    val memoryKey: String = "history",
+    val rounds: Int = -1,
+    chatMemory: BaseChatMessageHistory = ChatMessageHistory(),
+    outputKey: String? = null,
+    inputKey: String? = null,
+    returnMessages: Boolean = false
+): BaseChatMemory(chatMemory, outputKey, inputKey, returnMessages) {
     fun getBuffer(): List<BaseMessage> {
+        var msgList: List<BaseMessage> = chatMemory.messages
+        if (rounds >= 0) {
+            msgList = msgList.takeLast(rounds * 2)
+        }
         return if (returnMessages)
-            chatMemory.messages
+            msgList
         else
             listOf(BaseMessage(Util.getBufferString(
-                chatMemory.messages, humanPrefix, aiPrefix)))
+                msgList, humanPrefix, aiPrefix)))
     }
 
     override fun memoryVariables(): List<String> {

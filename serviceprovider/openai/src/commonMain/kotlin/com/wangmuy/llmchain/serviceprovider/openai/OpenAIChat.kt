@@ -25,7 +25,7 @@ class OpenAIChat @JvmOverloads constructor(
     proxy: String? = null
 ): BaseLLM() {
     companion object {
-        const val OPENAI_BASE_URL = "https://api.openai.com/"
+        const val OPENAI_BASE_URL = "https://api.openai.com/v1/"
         private val DEFAULT_PARAMS = mutableMapOf<String, Any>(
             REQ_USER_NAME to "test",
             REQ_MODEL_NAME to "gpt-3.5-turbo",
