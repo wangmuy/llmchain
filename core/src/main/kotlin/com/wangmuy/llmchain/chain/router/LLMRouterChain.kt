@@ -1,4 +1,4 @@
-package com.wangmuy.llmchain.agent.router
+package com.wangmuy.llmchain.chain.router
 
 import com.wangmuy.llmchain.callback.BaseCallbackManager
 import com.wangmuy.llmchain.chain.LLMChain

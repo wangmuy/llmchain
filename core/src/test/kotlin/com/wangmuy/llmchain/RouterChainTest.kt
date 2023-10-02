@@ -1,8 +1,8 @@
 package com.wangmuy.llmchain
 
-import com.wangmuy.llmchain.agent.router.LLMRouterChain
-import com.wangmuy.llmchain.agent.router.MultiPromptChain
-import com.wangmuy.llmchain.agent.router.RouterOutputParser
+import com.wangmuy.llmchain.chain.router.LLMRouterChain
+import com.wangmuy.llmchain.chain.router.MultiPromptChain
+import com.wangmuy.llmchain.chain.router.RouterOutputParser
 import com.wangmuy.llmchain.callback.CallbackManager
 import com.wangmuy.llmchain.callback.DefaultCallbackHandler
 import com.wangmuy.llmchain.chain.ConversationChain
