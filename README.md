@@ -147,6 +147,9 @@ output = conversation.invoke(mapOf("input" to "I'm doing well! Just having a con
 
 - LLM service provider
   - [x] OpenAI
+    - [x] ChatCompletion
+    - [x] Embedding
+    - [x] Function Calling
   - [x] [FastChat OpenAI-compatible restful apis](https://github.com/lm-sys/FastChat/blob/main/docs/openai_api.md)
   - [ ] GPT4All: java bindings for desktops
 
